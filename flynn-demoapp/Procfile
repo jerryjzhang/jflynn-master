@@ -1,0 +1,2 @@
+web: java -cp target/flynn-demoapp-0.0.1-SNAPSHOT.jar com.qq.junz.HelloWorld
+db: java -cp target/flynn-demoapp-0.0.1-SNAPSHOT.jar com.qq.junz.HelloDocker
