@@ -7,6 +7,8 @@ public class Release {
 	private String id;
 	private String artifactID;
 	private String appID;
+	private int version;
+	private String tag;
 	private Map<String,String> env = new HashMap<String,String>();
 	private Map<String,ProcessType> processes = new HashMap<String,ProcessType>();
 	
@@ -27,6 +29,18 @@ public class Release {
 	}
 	public void setAppID(String appID) {
 		this.appID = appID;
+	}
+	public int getVersion() {
+		return version;
+	}
+	public void setVersion(int version) {
+		this.version = version;
+	}
+	public String getTag() {
+		return tag;
+	}
+	public void setTag(String tag) {
+		this.tag = tag;
 	}
 	public Map<String, String> getEnv() {
 		return env;
