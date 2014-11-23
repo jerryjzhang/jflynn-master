@@ -1,5 +1,8 @@
 package com.tencent.jflynn.service;
 
-public interface AppService {
+import com.tencent.jflynn.domain.App;
 
+public interface AppService {
+	public void createApp(App app);
+	public App getAppByName(String appName);
 }
