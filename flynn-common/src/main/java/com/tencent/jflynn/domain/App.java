@@ -6,6 +6,7 @@ public class App {
 	private String id;
 	private String name;
 	private String releaseID;
+	private int latestVersion;
 	private Timestamp createTime;
 	
 	public String getId() {
@@ -25,6 +26,12 @@ public class App {
 	}
 	public void setReleaseID(String releaseID) {
 		this.releaseID = releaseID;
+	}
+	public int getLatestVersion() {
+		return latestVersion;
+	}
+	public void setLatestVersion(int latestVersion) {
+		this.latestVersion = latestVersion;
 	}
 	public Timestamp getCreateTime() {
 		return createTime;

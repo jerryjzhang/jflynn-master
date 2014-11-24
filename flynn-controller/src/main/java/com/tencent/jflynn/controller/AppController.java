@@ -1,6 +1,7 @@
 package com.tencent.jflynn.controller;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tencent.jflynn.domain.App;
+import com.tencent.jflynn.domain.Release;
 import com.tencent.jflynn.dto.AppRequest;
 import com.tencent.jflynn.exception.ObjectNotFoundException;
 import com.tencent.jflynn.service.AppService;
@@ -54,6 +56,15 @@ public class AppController {
     		throw new ObjectNotFoundException();
     	}
     	appService.deployApp(app, req);
+	}
+	
+	@RequestMapping(value="/list/release/{appName}", method=RequestMethod.GET)
+	public List<Release> getReleases(@PathVariable("appName") String appName){
+		App app = appService.getAppByName(appName);
+    	if(app == null){
+    		throw new ObjectNotFoundException();
+    	}
+    	return appService.getAppReleases(app);
 	}
 	
 //	@ResponseStatus(value=HttpStatus.INTERNAL_SERVER_ERROR, reason="internal server error")  // 409

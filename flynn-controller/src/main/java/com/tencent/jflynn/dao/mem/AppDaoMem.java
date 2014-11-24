@@ -1,4 +1,4 @@
-package com.tencent.jflynn.dao.impl;
+package com.tencent.jflynn.dao.mem;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,7 +9,7 @@ import com.tencent.jflynn.dao.AppDao;
 import com.tencent.jflynn.domain.App;
 
 @Repository
-public class AppDaoImpl implements AppDao {
+public class AppDaoMem implements AppDao {
 	private Map<String, App> nameToApp = new HashMap<String, App>();
 	private Map<String, App> idToApp = new HashMap<String, App>();
 	
@@ -20,5 +20,10 @@ public class AppDaoImpl implements AppDao {
 	
 	public App queryByName(String appName){
 		return nameToApp.get(appName);
+	}
+	
+	public void update(App app){
+		nameToApp.put(app.getName(), app);
+		idToApp.put(app.getId(), app);
 	}
 }
