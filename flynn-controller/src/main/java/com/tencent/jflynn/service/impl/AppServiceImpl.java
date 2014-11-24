@@ -2,6 +2,7 @@ package com.tencent.jflynn.service.impl;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,6 +15,7 @@ import com.tencent.jflynn.dao.ArtifactDao;
 import com.tencent.jflynn.dao.ReleaseDao;
 import com.tencent.jflynn.domain.App;
 import com.tencent.jflynn.domain.Artifact;
+import com.tencent.jflynn.domain.Formation;
 import com.tencent.jflynn.domain.ProcessType;
 import com.tencent.jflynn.domain.Release;
 import com.tencent.jflynn.dto.AppRequest;
@@ -96,6 +98,16 @@ public class AppServiceImpl implements AppService {
 		app.setReleaseID(release.getId());
 		app.setLatestVersion(release.getVersion());
 		appDao.update(app);
+	}
+	
+	public void scaleApp(App app, Release release, Formation formation){
+		for(Map.Entry<String,Integer> e : formation.getProcesses().entrySet()){
+			for(int i=1;i<=e.getValue();i++){
+				String cmd = "docker run -e SLUG_URL=" + release.getEnv().get("SLUG_URL") 
+						+ " flynn/slugrunner " + release.getProcesses().get(e.getKey()).getCmd();
+				ShellCommandExecutor.execute(cmd);
+			}
+		}
 	}
 	
 	public List<Release> getAppReleases(App app) {

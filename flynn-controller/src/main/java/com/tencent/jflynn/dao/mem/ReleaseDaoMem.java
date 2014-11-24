@@ -18,6 +18,10 @@ public class ReleaseDaoMem implements ReleaseDao {
 		idToRelease.put(release.getId(), release);
 	}
 	
+	public Release queryById(String id){
+		return idToRelease.get(id);
+	}
+	
 	public List<Release> queryByAppId(String appID){
 		List<Release> releases = new ArrayList<Release>();
 		

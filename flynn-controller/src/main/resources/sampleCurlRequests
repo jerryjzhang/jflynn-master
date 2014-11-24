@@ -1,4 +1,5 @@
-curl -d "" localhost:8080/apps/create/myapp
+curl -d '' localhost:8080/apps/create/myapp
 curl localhost:8080/apps/get/myapp
 curl -H "Content-Type: application/json" -d '{"svnURL":"http://svn"}' localhost:8080/apps/deploy/myapp
 curl localhost:8080/releases/get/app/myapp
+curl -H "Content-Type: application/json" -d '{"processes":{"web":2,"db":1}}' localhost:8080/apps/scale/myapp
