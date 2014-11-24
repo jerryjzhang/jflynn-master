@@ -54,4 +54,11 @@ public class Release {
 	public void setProcesses(Map<String, ProcessType> processes) {
 		this.processes = processes;
 	}
+	
+	@Override
+	public String toString() {
+		return "Release [id=" + id + ", artifactID=" + artifactID + ", appID="
+				+ appID + ", version=" + version + ", tag=" + tag + ", env="
+				+ env + ", processes=" + processes + "]";
+	}
 }

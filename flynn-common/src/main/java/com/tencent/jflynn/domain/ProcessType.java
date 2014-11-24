@@ -25,4 +25,10 @@ public class ProcessType {
 	public void setEnv(Map<String, String> env) {
 		this.env = env;
 	}
+	
+	@Override
+	public String toString() {
+		return "ProcessType [cmd=" + cmd + ", entrypoint=" + entrypoint
+				+ ", env=" + env + "]";
+	}
 }

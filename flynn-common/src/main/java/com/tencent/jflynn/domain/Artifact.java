@@ -24,5 +24,9 @@ public class Artifact {
 	public void setCreateTime(Timestamp createTime) {
 		this.createTime = createTime;
 	}
-	
+	@Override
+	public String toString() {
+		return "Artifact [id=" + id + ", uri=" + uri + ", createTime="
+				+ createTime + "]";
+	}
 }

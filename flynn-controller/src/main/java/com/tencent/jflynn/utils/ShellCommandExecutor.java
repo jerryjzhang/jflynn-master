@@ -13,7 +13,7 @@ import org.apache.commons.exec.PumpStreamHandler;
 public class ShellCommandExecutor {
 	public static String execute(String cmd){
 		System.out.println(cmd);
-		return "OK";
+		return "types -> web, db \n";
 		//return execute(cmd, null);
 	}
 	

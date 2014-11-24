@@ -58,15 +58,6 @@ public class AppController {
     	appService.deployApp(app, req);
 	}
 	
-	@RequestMapping(value="/list/release/{appName}", method=RequestMethod.GET)
-	public List<Release> getReleases(@PathVariable("appName") String appName){
-		App app = appService.getAppByName(appName);
-    	if(app == null){
-    		throw new ObjectNotFoundException();
-    	}
-    	return appService.getAppReleases(app);
-	}
-	
 //	@ResponseStatus(value=HttpStatus.INTERNAL_SERVER_ERROR, reason="internal server error")  // 409
 //	@ExceptionHandler(Exception.class)
 //	public void handleException(){
