@@ -3,7 +3,6 @@ package com.tencent.jflynn.controller;
 import java.sql.Timestamp;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.tencent.jflynn.domain.App;
 import com.tencent.jflynn.domain.Formation;
 import com.tencent.jflynn.domain.Release;
-import com.tencent.jflynn.dto.AppRequest;
+import com.tencent.jflynn.dto.DeployRequest;
 import com.tencent.jflynn.exception.ObjectNotFoundException;
 import com.tencent.jflynn.service.AppService;
 import com.tencent.jflynn.service.ReleaseService;
@@ -52,7 +51,7 @@ public class AppController {
 	
 	@RequestMapping(value="/deploy/{appName}", method=RequestMethod.POST, consumes="application/json")
 	public void deploy(@PathVariable("appName") String appName,
-			@RequestBody AppRequest req){
+			@RequestBody DeployRequest req){
 		App app = appService.getAppByName(appName);
     	if(app == null){
     		throw new ObjectNotFoundException();

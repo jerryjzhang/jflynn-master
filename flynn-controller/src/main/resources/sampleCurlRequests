@@ -3,3 +3,32 @@ curl localhost:8080/apps/get/myapp
 curl -H "Content-Type: application/json" -d '{"svnURL":"http://tc-svn.tencent.com/doss/doss_openapi_rep/openapi_proj/trunk/docker/flynn/flynn-demoapp"}' localhost:8080/apps/deploy/myapp
 curl localhost:8080/releases/get/app/myapp
 curl -H "Content-Type: application/json" -d '{"processes":{"web":2,"db":1}}' localhost:8080/apps/scale/myapp
+
+###Test create app
+curl -d '' localhost:8080/apps/create/myapp
+
+###Test add comment
+curl -H "Content-Type: application/json" \
+	 -d '{"dockerImage":"docker.oa.com:8080/tegdsf/routercenter", "comment":"first deploy"}' \
+	 localhost:8080/apps/deploy/myapp
+
+###Test add process cmd
+curl -H "Content-Type: application/json" \
+	 -d '{"dockerImage":"docker.oa.com:8080/tegdsf/routercenter", "processCmd":{"web":"start web"}}' \
+	 localhost:8080/apps/deploy/myapp
+
+###Test add process env
+curl -H "Content-Type: application/json" \
+	 -d '{"dockerImage":"docker.oa.com:8080/tegdsf/routercenter", "processEnv":{"web":{"URL":"url","MODE":"DEV"}}}' \
+	 localhost:8080/apps/deploy/myapp
+
+	 
+###Test update process cmd
+curl -H "Content-Type: application/json" \
+	 -d '{"processCmd":{"web":"update web"}}' \
+	 localhost:8080/apps/deploy/myapp
+	 
+###Test update process env
+curl -H "Content-Type: application/json" \
+	 -d '{"processEnv":{"web":{"URL":"url","MODE":"PROD"}}}' \
+	 localhost:8080/apps/deploy/myapp

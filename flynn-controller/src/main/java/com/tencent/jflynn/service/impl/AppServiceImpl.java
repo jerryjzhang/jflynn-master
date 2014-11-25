@@ -1,10 +1,5 @@
 package com.tencent.jflynn.service.impl;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
-import java.io.UnsupportedEncodingException;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
@@ -26,7 +21,7 @@ import com.tencent.jflynn.domain.Artifact;
 import com.tencent.jflynn.domain.Formation;
 import com.tencent.jflynn.domain.ProcessType;
 import com.tencent.jflynn.domain.Release;
-import com.tencent.jflynn.dto.AppRequest;
+import com.tencent.jflynn.dto.DeployRequest;
 import com.tencent.jflynn.service.AppService;
 import com.tencent.jflynn.utils.IdGenerator;
 import com.tencent.jflynn.utils.ShellCommandExecutor;
@@ -55,7 +50,7 @@ public class AppServiceImpl implements AppService {
 	@Value("${slugBuildScript:slugBuild.sh}")
 	private String slugBuildScript;
 	
-	private static final Pattern PATTERN_TYPES = Pattern.compile(".*declares types.* -> (.+)");
+	private static final Pattern PATTERN_TYPES = Pattern.compile(".*declares types.* -> (.+) \n");
 	
 	public void createApp(App app){
 		appDao.insert(app);
@@ -65,7 +60,111 @@ public class AppServiceImpl implements AppService {
 		return appDao.queryByName(appName);
 	}
 	
-	public void deployApp(App app, AppRequest req){
+	public static void main(String [] args){
+		String out = "Procfile declares types -> web, db \n";
+		Matcher m = PATTERN_TYPES.matcher(out);
+		String [] processTypes = null;
+		if(m.matches()){
+			processTypes = m.group(1).split(", ");
+			System.out.println(processTypes);
+		}
+	}
+	
+	public void deployApp(App app, DeployRequest req){
+		Release release = null;
+		if(app.getReleaseID() != null){
+			release = releaseDao.queryById(app.getReleaseID());
+		}
+		if(release == null){
+			release = new Release();
+			release.setAppID(app.getId());
+		}
+		release.setId(IdGenerator.generate());
+		release.setVersion(app.getLatestVersion() + 1);
+		release.setTag(req.getComment());
+		release.setCreateTime(new Timestamp(System.currentTimeMillis()));
+		app.setLatestVersion(release.getVersion());
+		app.setReleaseID(release.getId());
+		
+		//build new artifact if either svnURL or dockerImage is specified
+		if(req.getSvnURL() != null){
+			handleSvnDeploy(app, release, req);
+		}else if(req.getDockerImage() != null){
+			handleImageDeploy(app, release, req);
+		}
+		
+		//update release environment variables
+		if(req.getReleaseEnv() != null){
+			for(Map.Entry<String, String> e : req.getReleaseEnv().entrySet()){
+				release.getEnv().put(e.getKey(), e.getValue());
+			}
+		}
+		
+		//update process cmd 
+		if(req.getProcessCmd() != null){
+			for(Map.Entry<String, String> e : req.getProcessCmd().entrySet()){
+				String procName = e.getKey();
+				ProcessType procType = release.getProcesses().get(procName);
+				if(procType == null){
+					procType = new ProcessType();
+					release.getProcesses().put(procName, procType);
+				}
+				procType.setCmd(e.getValue());
+			}
+		}
+		
+		//update process entrypoint
+		if(req.getProcessEpt() != null){
+			for(Map.Entry<String, String> e : req.getProcessEpt().entrySet()){
+				String procName = e.getKey();
+				ProcessType procType = release.getProcesses().get(procName);
+				if(procType == null){
+					procType = new ProcessType();
+					release.getProcesses().put(procName, procType);
+				}
+				procType.setEntrypoint(e.getValue());
+			}
+		}
+		
+		//update process environment variables
+		if(req.getProcessEnv() != null){
+			for(Map.Entry<String, Map<String,String>> e : req.getProcessEnv().entrySet()){
+				String procName = e.getKey();
+				ProcessType procType = release.getProcesses().get(procName);
+				if(procType == null){
+					procType = new ProcessType();
+					release.getProcesses().put(procName, procType);
+				}
+				for(Map.Entry<String, String> env : e.getValue().entrySet()){
+					procType.getEnv().put(env.getKey(), env.getValue());
+				}
+			}
+		}
+		
+		//if no processes in the release, create a "default" one
+		if(release.getProcesses().size() == 0){
+			release.getProcesses().put("default", new ProcessType());
+		}
+		
+		releaseDao.insert(release);
+		LOG.info("Created release for appName=" + app.getName() + " release=" + release);
+		appDao.update(app);
+		LOG.info("Updated appName=" + app.getName() + " set current releaseId=" + app.getReleaseID());
+	}
+	
+	private void handleImageDeploy(App app, Release release, DeployRequest req){
+		//create artifact and release object
+		Artifact artifact = new Artifact();
+		artifact.setId(IdGenerator.generate());
+		artifact.setUri(req.getDockerImage());
+		artifact.setCreateTime(new Timestamp(System.currentTimeMillis()));
+		artifactDao.insert(artifact);
+		LOG.info("Created artifact for appName=" + app.getName() + " artifact=" + artifact);
+		
+		release.setArtifactID(artifact.getId());
+	}
+	
+	private void handleSvnDeploy(App app, Release release, DeployRequest req){
 		String fileName = app.getName() + "-" + System.currentTimeMillis();
 		Map<String,String> env = new HashMap<String,String>();
 		env.put("SVN_URL", req.getSvnURL());
@@ -92,14 +191,8 @@ public class AppServiceImpl implements AppService {
 		artifactDao.insert(artifact);
 		LOG.info("Created artifact for appName=" + app.getName() + " artifact=" + artifact);
 		
-		Release release = new Release();
-		release.setId(IdGenerator.generate());
-		release.setAppID(app.getId());
 		release.setArtifactID(artifact.getId());
-		release.setTag(req.getComment());
 		release.getEnv().put("SLUG_URL", httpServerUrl + "/slug/" + fileName + ".tgz");
-		int lastestVersion = app.getLatestVersion();
-		release.setVersion(lastestVersion + 1);
 		if(processTypes != null){
 			for(String type : processTypes){
 				type = type.trim();
@@ -108,15 +201,7 @@ public class AppServiceImpl implements AppService {
 				release.getProcesses().put(type, ptype);
 			}
 		}
-		releaseDao.insert(release);
-		LOG.info("Created release for appName=" + app.getName() + " release=" + release);
-		
-		//set app current release to the newly created release
-		app.setReleaseID(release.getId());
-		app.setLatestVersion(release.getVersion());
-		appDao.update(app);
 	}
-	
 //	
 //	public void deployApp(App app, AppRequest req){
 //		String fileName = app.getName() + "-" + System.currentTimeMillis();

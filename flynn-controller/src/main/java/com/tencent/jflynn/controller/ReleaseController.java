@@ -20,11 +20,12 @@ public class ReleaseController {
 	private AppService appService;
 	
 	@RequestMapping(value="/get/app/{appName}", method=RequestMethod.GET)
-	public List<Release> getByAppName(@PathVariable("appName") String appName){
+	public Release[] getByAppName(@PathVariable("appName") String appName){
 		App app = appService.getAppByName(appName);
     	if(app == null){
     		throw new ObjectNotFoundException();
     	}
-    	return appService.getAppReleases(app);
+    	List<Release> releases = appService.getAppReleases(app);
+    	return releases.toArray(new Release[releases.size()]);
 	}
 }

@@ -1,5 +1,6 @@
 package com.tencent.jflynn.domain;
 
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,6 +10,7 @@ public class Release {
 	private String appID;
 	private int version;
 	private String tag;
+	private Timestamp createTime;
 	private Map<String,String> env = new HashMap<String,String>();
 	private Map<String,ProcessType> processes = new HashMap<String,ProcessType>();
 	
@@ -41,6 +43,12 @@ public class Release {
 	}
 	public void setTag(String tag) {
 		this.tag = tag;
+	}
+	public Timestamp getCreateTime() {
+		return createTime;
+	}
+	public void setCreateTime(Timestamp createTime) {
+		this.createTime = createTime;
 	}
 	public Map<String, String> getEnv() {
 		return env;

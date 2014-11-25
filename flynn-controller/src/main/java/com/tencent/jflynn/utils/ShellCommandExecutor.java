@@ -34,7 +34,7 @@ public class ShellCommandExecutor {
 		if("DEV".equals(System.getenv("CONFIG_MODE"))){
 			CommandLine cl = CommandLine.parse(cmd);
 			System.out.println("Executing... " + cl);
-			return "types -> web, db \n";
+			return "Procfile declares types -> web, db \n";
 		}
 		
 		Executor exec = new DefaultExecutor();
