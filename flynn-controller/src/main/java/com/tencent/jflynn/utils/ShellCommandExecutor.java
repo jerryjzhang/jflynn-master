@@ -12,9 +12,12 @@ import org.apache.commons.exec.PumpStreamHandler;
 
 public class ShellCommandExecutor {
 	public static String execute(String cmd){
-		System.out.println(cmd);
-		return "types -> web, db \n";
-		//return execute(cmd, null);
+		System.out.println("Executing... " + cmd);
+		if("DEV".equals(System.getenv("CONFIG_MODE"))){
+			return "types -> web, db \n";
+		}else{
+			return execute(cmd, null);
+		}
 	}
 	
 	public static String execute(String cmd, File workDir){
