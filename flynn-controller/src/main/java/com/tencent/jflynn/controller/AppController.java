@@ -36,7 +36,7 @@ public class AppController {
     	return app;
     }
 	
-	@RequestMapping(value="/create/{appName}", method=RequestMethod.POST)
+	@RequestMapping(value="/create/{appName}", method=RequestMethod.POST, produces="application/json")
 	public String create(@PathVariable("appName") String appName){
 		App app = new App();
 		app.setId(IdGenerator.generate());
