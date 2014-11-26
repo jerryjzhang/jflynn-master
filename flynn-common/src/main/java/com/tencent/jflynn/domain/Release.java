@@ -11,8 +11,8 @@ public class Release {
 	private int version;
 	private String tag;
 	private Timestamp createTime;
-	private Map<String,String> env = new HashMap<String,String>();
-	private Map<String,ProcessType> processes = new HashMap<String,ProcessType>();
+	private Map<String,String> appEnv = new HashMap<String,String>();
+	private Map<String,Program> programs = new HashMap<String,Program>();
 	
 	public String getId() {
 		return id;
@@ -50,23 +50,23 @@ public class Release {
 	public void setCreateTime(Timestamp createTime) {
 		this.createTime = createTime;
 	}
-	public Map<String, String> getEnv() {
-		return env;
+	public Map<String, String> getAppEnv() {
+		return appEnv;
 	}
-	public void setEnv(Map<String, String> env) {
-		this.env = env;
+	public void setAppEnv(Map<String, String> env) {
+		this.appEnv = env;
 	}
-	public Map<String, ProcessType> getProcesses() {
-		return processes;
+	public Map<String, Program> getPrograms() {
+		return programs;
 	}
-	public void setProcesses(Map<String, ProcessType> processes) {
-		this.processes = processes;
+	public void setPrograms(Map<String, Program> processes) {
+		this.programs = processes;
 	}
 	
 	@Override
 	public String toString() {
 		return "Release [id=" + id + ", artifactID=" + artifactID + ", appID="
 				+ appID + ", version=" + version + ", tag=" + tag + ", env="
-				+ env + ", processes=" + processes + "]";
+				+ appEnv + ", processes=" + programs + "]";
 	}
 }

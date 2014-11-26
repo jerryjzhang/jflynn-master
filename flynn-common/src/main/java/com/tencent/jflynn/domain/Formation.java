@@ -6,7 +6,7 @@ import java.util.Map;
 public class Formation {
 	private String appID;
 	private String releaseID;
-	private Map<String,Integer> processes = new HashMap<String,Integer>();
+	private Map<String,Integer> programReplica = new HashMap<String,Integer>();
 
 	public String getAppID() {
 		return appID;
@@ -20,10 +20,10 @@ public class Formation {
 	public void setReleaseID(String releaseID) {
 		this.releaseID = releaseID;
 	}
-	public Map<String, Integer> getProcesses() {
-		return processes;
+	public Map<String, Integer> getProgramReplica() {
+		return programReplica;
 	}
-	public void setProcesses(Map<String, Integer> processes) {
-		this.processes = processes;
+	public void setProgramReplica(Map<String, Integer> programReplica) {
+		this.programReplica = programReplica;
 	}
 }

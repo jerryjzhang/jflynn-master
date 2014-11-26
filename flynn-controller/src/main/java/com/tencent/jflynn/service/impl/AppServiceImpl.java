@@ -19,7 +19,7 @@ import com.tencent.jflynn.dao.ReleaseDao;
 import com.tencent.jflynn.domain.App;
 import com.tencent.jflynn.domain.Artifact;
 import com.tencent.jflynn.domain.Formation;
-import com.tencent.jflynn.domain.ProcessType;
+import com.tencent.jflynn.domain.Program;
 import com.tencent.jflynn.domain.Release;
 import com.tencent.jflynn.dto.DeployRequest;
 import com.tencent.jflynn.dto.ScaleRequest;
@@ -85,46 +85,46 @@ public class AppServiceImpl implements AppService {
 		}
 		
 		//update release environment variables
-		if(req.getReleaseEnv() != null){
-			for(Map.Entry<String, String> e : req.getReleaseEnv().entrySet()){
-				release.getEnv().put(e.getKey(), e.getValue());
+		if(req.getAppEnv() != null){
+			for(Map.Entry<String, String> e : req.getAppEnv().entrySet()){
+				release.getAppEnv().put(e.getKey(), e.getValue());
 			}
 		}
 		
 		//update process cmd 
-		if(req.getProcessCmd() != null){
-			for(Map.Entry<String, String> e : req.getProcessCmd().entrySet()){
+		if(req.getProgramCmd() != null){
+			for(Map.Entry<String, String> e : req.getProgramCmd().entrySet()){
 				String procName = e.getKey();
-				ProcessType procType = release.getProcesses().get(procName);
+				Program procType = release.getPrograms().get(procName);
 				if(procType == null){
-					procType = new ProcessType();
-					release.getProcesses().put(procName, procType);
+					procType = new Program();
+					release.getPrograms().put(procName, procType);
 				}
 				procType.setCmd(e.getValue());
 			}
 		}
 		
 		//update process entrypoint
-		if(req.getProcessEpt() != null){
-			for(Map.Entry<String, String> e : req.getProcessEpt().entrySet()){
+		if(req.getProgramEpt() != null){
+			for(Map.Entry<String, String> e : req.getProgramEpt().entrySet()){
 				String procName = e.getKey();
-				ProcessType procType = release.getProcesses().get(procName);
+				Program procType = release.getPrograms().get(procName);
 				if(procType == null){
-					procType = new ProcessType();
-					release.getProcesses().put(procName, procType);
+					procType = new Program();
+					release.getPrograms().put(procName, procType);
 				}
 				procType.setEntrypoint(e.getValue());
 			}
 		}
 		
 		//update process environment variables
-		if(req.getProcessEnv() != null){
-			for(Map.Entry<String, Map<String,String>> e : req.getProcessEnv().entrySet()){
+		if(req.getProgramEnv() != null){
+			for(Map.Entry<String, Map<String,String>> e : req.getProgramEnv().entrySet()){
 				String procName = e.getKey();
-				ProcessType procType = release.getProcesses().get(procName);
+				Program procType = release.getPrograms().get(procName);
 				if(procType == null){
-					procType = new ProcessType();
-					release.getProcesses().put(procName, procType);
+					procType = new Program();
+					release.getPrograms().put(procName, procType);
 				}
 				for(Map.Entry<String, String> env : e.getValue().entrySet()){
 					procType.getEnv().put(env.getKey(), env.getValue());
@@ -133,8 +133,8 @@ public class AppServiceImpl implements AppService {
 		}
 		
 		//if no processes in the release, create a "default" one
-		if(release.getProcesses().size() == 0){
-			release.getProcesses().put("default", new ProcessType());
+		if(release.getPrograms().size() == 0){
+			release.getPrograms().put("default", new Program());
 		}
 		
 		releaseDao.insert(release);
@@ -183,13 +183,13 @@ public class AppServiceImpl implements AppService {
 		LOG.info("Created artifact for appName=" + app.getName() + " artifact=" + artifact);
 		
 		release.setArtifactID(artifact.getId());
-		release.getEnv().put("SLUG_URL", httpServerUrl + "/slugs/" + fileName + ".tgz");
+		release.getAppEnv().put("SLUG_URL", httpServerUrl + "/slugs/" + fileName + ".tgz");
 		if(processTypes != null){
 			for(String type : processTypes){
 				type = type.trim();
-				ProcessType ptype = new ProcessType();
+				Program ptype = new Program();
 				ptype.setCmd("start " + type);
-				release.getProcesses().put(type, ptype);
+				release.getPrograms().put(type, ptype);
 			}
 		}
 	}
@@ -246,17 +246,17 @@ public class AppServiceImpl implements AppService {
 		}
 		
 		formation.setReleaseID(release.getId());
-		for(Map.Entry<String,Integer> e : req.getProcessReplica().entrySet()){
-			ProcessType ptype = release.getProcesses().get(e.getKey());
+		for(Map.Entry<String,Integer> e : req.getProgramReplica().entrySet()){
+			Program ptype = release.getPrograms().get(e.getKey());
 			if(ptype == null)continue;
-			formation.getProcesses().put(e.getKey(), e.getValue());
+			formation.getProgramReplica().put(e.getKey(), e.getValue());
 		}
 		formationDao.save(formation);
 		
 		//simulate replicationController and agent logic
-		for(Map.Entry<String,Integer> e : req.getProcessReplica().entrySet()){
+		for(Map.Entry<String,Integer> e : req.getProgramReplica().entrySet()){
 			for(int i=1;i<=e.getValue();i++){
-				ProcessType ptype = release.getProcesses().get(e.getKey());
+				Program ptype = release.getPrograms().get(e.getKey());
 				if(ptype == null)continue;
 				StringBuilder cmd = new StringBuilder();
 				cmd.append("docker run -d -P ");
@@ -264,7 +264,7 @@ public class AppServiceImpl implements AppService {
 					cmd.append(" -entrypoint " + ptype.getEntrypoint());
 					cmd.append(" ");
 				}
-				for(Map.Entry<String,String> env : release.getEnv().entrySet()){
+				for(Map.Entry<String,String> env : release.getAppEnv().entrySet()){
 					cmd.append(" -e " + env.getKey() + "=" + env.getValue());
 					cmd.append(" ");
 				}

@@ -73,8 +73,8 @@ public class AppIntegrationTest {
 		assertNotNull(release.getId());
 		assertEquals(1, release.getVersion());
 		assertEquals(req.getComment(), release.getTag());
-		assertTrue(release.getProcesses().size() >= 1);
-		assertNotNull(release.getEnv().get("SLUG_URL"));
+		assertTrue(release.getPrograms().size() >= 1);
+		assertNotNull(release.getAppEnv().get("SLUG_URL"));
 	}
 	
 	@Test
@@ -95,8 +95,8 @@ public class AppIntegrationTest {
 		assertNotNull(release.getId());
 		assertEquals(1, release.getVersion());
 		assertEquals(req.getComment(), release.getTag());
-		assertTrue(release.getProcesses().size() >= 1);
-		assertNull(release.getEnv().get("SLUG_URL"));
+		assertTrue(release.getPrograms().size() >= 1);
+		assertNull(release.getAppEnv().get("SLUG_URL"));
 	}
 	
 	@Test
@@ -104,8 +104,8 @@ public class AppIntegrationTest {
 		//deploy app
 		DeployRequest req = new DeployRequest();
 		req.setDockerImage("tegdsf/routercenter");
-		req.setReleaseEnv(new HashMap<String,String>());
-		req.getReleaseEnv().put("URL", "http://dsf");
+		req.setAppEnv(new HashMap<String,String>());
+		req.getAppEnv().put("URL", "http://dsf");
 		restTemplate.postForEntity(baseURL+"/apps/deploy/"+appName, req, Void.class);
 		
 		//get app releases and check
@@ -117,9 +117,9 @@ public class AppIntegrationTest {
 		assertNotNull(release.getAppID());
 		assertNotNull(release.getId());
 		assertEquals(1, release.getVersion());
-		assertTrue(release.getProcesses().size() >= 1);
-		assertEquals(req.getReleaseEnv().get("URL"),
-				release.getEnv().get("URL"));
+		assertTrue(release.getPrograms().size() >= 1);
+		assertEquals(req.getAppEnv().get("URL"),
+				release.getAppEnv().get("URL"));
 	}
 	
 	@Test
@@ -127,8 +127,8 @@ public class AppIntegrationTest {
 		//deploy app
 		DeployRequest req = new DeployRequest();
 		req.setDockerImage("tegdsf/routercenter");
-		req.setProcessCmd(new HashMap<String,String>());
-		req.getProcessCmd().put("web", "new cmd");
+		req.setProgramCmd(new HashMap<String,String>());
+		req.getProgramCmd().put("web", "new cmd");
 		restTemplate.postForEntity(baseURL+"/apps/deploy/"+appName, req, Void.class);
 		
 		//get app releases and check
@@ -140,9 +140,9 @@ public class AppIntegrationTest {
 		assertNotNull(release.getAppID());
 		assertNotNull(release.getId());
 		assertEquals(1, release.getVersion());
-		assertTrue(release.getProcesses().size() >= 1);
-		assertEquals(req.getProcessCmd().get("web"),
-				release.getProcesses().get("web").getCmd());
+		assertTrue(release.getPrograms().size() >= 1);
+		assertEquals(req.getProgramCmd().get("web"),
+				release.getPrograms().get("web").getCmd());
 	}
 	
 	@Test
@@ -150,8 +150,8 @@ public class AppIntegrationTest {
 		//deploy app
 		DeployRequest req = new DeployRequest();
 		req.setDockerImage("tegdsf/routercenter");
-		req.setProcessEpt(new HashMap<String,String>());
-		req.getProcessEpt().put("web", "new entrypoint");
+		req.setProgramEpt(new HashMap<String,String>());
+		req.getProgramEpt().put("web", "new entrypoint");
 		
 		restTemplate.postForEntity(baseURL+"/apps/deploy/"+appName, req, Void.class);
 		//get app releases and check
@@ -163,9 +163,9 @@ public class AppIntegrationTest {
 		assertNotNull(release.getAppID());
 		assertNotNull(release.getId());
 		assertEquals(1, release.getVersion());
-		assertTrue(release.getProcesses().size() >= 1);
-		assertEquals(req.getProcessEpt().get("web"),
-				release.getProcesses().get("web").getEntrypoint());
+		assertTrue(release.getPrograms().size() >= 1);
+		assertEquals(req.getProgramEpt().get("web"),
+				release.getPrograms().get("web").getEntrypoint());
 	}
 	
 	@Test
@@ -173,9 +173,9 @@ public class AppIntegrationTest {
 		//deploy app
 		DeployRequest req = new DeployRequest();
 		req.setDockerImage("tegdsf/routercenter");
-		req.setProcessEnv(new HashMap<String, Map<String,String>>());
-		req.getProcessEnv().put("web", new HashMap<String,String>());
-		req.getProcessEnv().get("web").put("URL", "http://dsf");
+		req.setProgramEnv(new HashMap<String, Map<String,String>>());
+		req.getProgramEnv().put("web", new HashMap<String,String>());
+		req.getProgramEnv().get("web").put("URL", "http://dsf");
 		
 		restTemplate.postForEntity(baseURL+"/apps/deploy/"+appName, req, Void.class);
 		//get app releases and check
@@ -187,9 +187,9 @@ public class AppIntegrationTest {
 		assertNotNull(release.getAppID());
 		assertNotNull(release.getId());
 		assertEquals(1, release.getVersion());
-		assertTrue(release.getProcesses().size() >= 1);
-		assertEquals(req.getProcessEnv().get("web").get("URL"),
-				release.getProcesses().get("web").getEnv().get("URL"));
+		assertTrue(release.getPrograms().size() >= 1);
+		assertEquals(req.getProgramEnv().get("web").get("URL"),
+				release.getPrograms().get("web").getEnv().get("URL"));
 	}
 	
 	@Test
@@ -197,15 +197,15 @@ public class AppIntegrationTest {
 		//deploy app
 		DeployRequest req = new DeployRequest();
 		req.setDockerImage("tegdsf/routercenter");
-		req.setProcessEnv(new HashMap<String, Map<String,String>>());
-		req.getProcessEnv().put("web", new HashMap<String,String>());
-		req.getProcessEnv().get("web").put("URL", "http://dsf");
+		req.setProgramEnv(new HashMap<String, Map<String,String>>());
+		req.getProgramEnv().put("web", new HashMap<String,String>());
+		req.getProgramEnv().get("web").put("URL", "http://dsf");
 		restTemplate.postForEntity(baseURL+"/apps/deploy/"+appName, req, Void.class);
 		
 		//scale app
 		ScaleRequest sreq = new ScaleRequest();
-		sreq.setProcessReplica(new HashMap<String,Integer>());
-		sreq.getProcessReplica().put("web", 1);
+		sreq.setProgramReplica(new HashMap<String,Integer>());
+		sreq.getProgramReplica().put("web", 1);
 		restTemplate.postForEntity(baseURL+"/apps/scale/"+appName, sreq, Void.class);
 		
 		//get app formation and check
@@ -213,8 +213,8 @@ public class AppIntegrationTest {
 		assertNotNull(formation);
 		assertNotNull(formation.getAppID());
 		assertNotNull(formation.getReleaseID());
-		assertTrue(formation.getProcesses().size() > 0);
-		assertEquals(sreq.getProcessReplica().get("web"), 
-				formation.getProcesses().get("web"));
+		assertTrue(formation.getProgramReplica().size() > 0);
+		assertEquals(sreq.getProgramReplica().get("web"), 
+				formation.getProgramReplica().get("web"));
 	}
 }

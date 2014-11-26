@@ -3,7 +3,7 @@ package com.tencent.jflynn.domain;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ProcessType {
+public class Program {
 	private String cmd;
 	private String entrypoint;
 	private Map<String,String> env = new HashMap<String,String>();

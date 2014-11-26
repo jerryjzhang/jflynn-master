@@ -3,13 +3,13 @@ package com.tencent.jflynn.dto;
 import java.util.Map;
 
 public class ScaleRequest {
-	private Map<String,Integer> processReplica;
+	private Map<String,Integer> programReplica;
 
-	public Map<String, Integer> getProcessReplica() {
-		return processReplica;
+	public Map<String, Integer> getProgramReplica() {
+		return programReplica;
 	}
 
-	public void setProcessReplica(Map<String, Integer> processReplica) {
-		this.processReplica = processReplica;
+	public void setProgramReplica(Map<String, Integer> processReplica) {
+		this.programReplica = processReplica;
 	}
 }

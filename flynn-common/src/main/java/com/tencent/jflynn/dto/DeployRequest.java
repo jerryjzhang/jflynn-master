@@ -5,10 +5,10 @@ import java.util.Map;
 public class DeployRequest {
 	private String svnURL;
 	private String dockerImage;
-	private Map<String,String> releaseEnv;
-	private Map<String,String> processCmd;
-	private Map<String,String> processEpt;
-	private Map<String,Map<String,String>> processEnv;
+	private Map<String,String> appEnv;
+	private Map<String,String> programCmd;
+	private Map<String,String> programEpt;
+	private Map<String,Map<String,String>> programEnv;
 	
 	private String comment;
 	
@@ -30,28 +30,28 @@ public class DeployRequest {
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
-	public Map<String, String> getReleaseEnv() {
-		return releaseEnv;
+	public Map<String, String> getAppEnv() {
+		return appEnv;
 	}
-	public void setReleaseEnv(Map<String, String> releaseEnv) {
-		this.releaseEnv = releaseEnv;
+	public void setAppEnv(Map<String, String> releaseEnv) {
+		this.appEnv = releaseEnv;
 	}
-	public Map<String, String> getProcessCmd() {
-		return processCmd;
+	public Map<String, String> getProgramCmd() {
+		return programCmd;
 	}
-	public void setProcessCmd(Map<String, String> processCmd) {
-		this.processCmd = processCmd;
+	public void setProgramCmd(Map<String, String> processCmd) {
+		this.programCmd = processCmd;
 	}
-	public Map<String, String> getProcessEpt() {
-		return processEpt;
+	public Map<String, String> getProgramEpt() {
+		return programEpt;
 	}
-	public void setProcessEpt(Map<String, String> processEpt) {
-		this.processEpt = processEpt;
+	public void setProgramEpt(Map<String, String> processEpt) {
+		this.programEpt = processEpt;
 	}
-	public Map<String, Map<String, String>> getProcessEnv() {
-		return processEnv;
+	public Map<String, Map<String, String>> getProgramEnv() {
+		return programEnv;
 	}
-	public void setProcessEnv(Map<String, Map<String, String>> processEnv) {
-		this.processEnv = processEnv;
+	public void setProgramEnv(Map<String, Map<String, String>> processEnv) {
+		this.programEnv = processEnv;
 	}
 }
