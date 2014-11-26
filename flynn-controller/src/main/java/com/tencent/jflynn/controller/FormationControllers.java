@@ -28,7 +28,7 @@ public class FormationControllers {
     	return formationService.getAllFormations();
     }
 	
-	@RequestMapping(value="/get/app/{appName}", method=RequestMethod.GET, consumes="application/json")
+	@RequestMapping(value="/get/app/{appName}", method=RequestMethod.GET)
 	public Formation getAppFormation(@PathVariable("appName") String appName){
 		App app = appService.getAppByName(appName);
     	if(app == null){

@@ -15,4 +15,8 @@ public class ArtifactDaoMem implements ArtifactDao {
 	public void insert(Artifact artifact){
 		idToArtifact.put(artifact.getId(), artifact);
 	}
+	
+	public Artifact queryById(String artifactId){
+		return idToArtifact.get(artifactId);
+	}
 }

@@ -17,18 +17,20 @@ import org.springframework.web.client.RestTemplate;
 
 import com.tencent.jflynn.boot.JFlynnMain;
 import com.tencent.jflynn.domain.App;
+import com.tencent.jflynn.domain.Formation;
 import com.tencent.jflynn.domain.Release;
 import com.tencent.jflynn.dto.DeployRequest;
+import com.tencent.jflynn.dto.ScaleRequest;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = JFlynnMain.class)
 @WebAppConfiguration
 @IntegrationTest("CONFIG_MODE:DEV")
-public class AppControllerTest {
+public class AppIntegrationTest {
 	private RestTemplate restTemplate = new TestRestTemplate();
-	private final String baseURL = "http://localhost:8080";
+	private final String baseURL = "http://localhost:58080";
 	
-	public AppControllerTest(){
+	public AppIntegrationTest(){
 		
 	}
 	
@@ -189,5 +191,31 @@ public class AppControllerTest {
 		assertTrue(release.getProcesses().size() >= 1);
 		assertEquals(req.getProcessEnv().get("web").get("URL"),
 				release.getProcesses().get("web").getEnv().get("URL"));
+	}
+	
+	@Test
+	public void testScaleApp(){
+		//deploy app
+		DeployRequest req = new DeployRequest();
+		req.setDockerImage("tegdsf/routercenter");
+		req.setProcessEnv(new HashMap<String, Map<String,String>>());
+		req.getProcessEnv().put("web", new HashMap<String,String>());
+		req.getProcessEnv().get("web").put("URL", "http://dsf");
+		restTemplate.postForEntity(baseURL+"/apps/deploy/"+appName, req, Void.class);
+		
+		//scale app
+		ScaleRequest sreq = new ScaleRequest();
+		sreq.setProcessReplica(new HashMap<String,Integer>());
+		sreq.getProcessReplica().put("web", 1);
+		restTemplate.postForEntity(baseURL+"/apps/scale/"+appName, sreq, Void.class);
+		
+		//get app formation and check
+		Formation formation = restTemplate.getForEntity(baseURL+"/formations/get/app/"+appName, Formation.class).getBody();
+		assertNotNull(formation);
+		assertNotNull(formation.getAppID());
+		assertNotNull(formation.getReleaseID());
+		assertTrue(formation.getProcesses().size() > 0);
+		assertEquals(sreq.getProcessReplica().get("web"), 
+				formation.getProcesses().get("web"));
 	}
 }

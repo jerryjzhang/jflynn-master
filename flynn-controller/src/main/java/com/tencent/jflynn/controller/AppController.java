@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tencent.jflynn.domain.App;
-import com.tencent.jflynn.domain.Formation;
 import com.tencent.jflynn.domain.Release;
 import com.tencent.jflynn.dto.DeployRequest;
+import com.tencent.jflynn.dto.ScaleRequest;
 import com.tencent.jflynn.exception.ObjectNotFoundException;
 import com.tencent.jflynn.service.AppService;
 import com.tencent.jflynn.service.ReleaseService;
@@ -61,17 +61,16 @@ public class AppController {
 	
 	@RequestMapping(value="/scale/{appName}", method=RequestMethod.POST, consumes="application/json")
 	public void scale(@PathVariable("appName") String appName,
-			@RequestBody Formation formation){
+			@RequestBody ScaleRequest req){
 		App app = appService.getAppByName(appName);
-		if(formation.getReleaseID() == null){
-			formation.setReleaseID(app.getReleaseID());
-		}
-		Release release = releaesService.getReleaseById(formation.getReleaseID());
-		if(app == null || release == null){
+		Release release = null;
+		if(app == null || 
+				app.getReleaseID() == null || 
+				(release = releaesService.getReleaseById(app.getReleaseID())) == null){
 			throw new ObjectNotFoundException();
 		}
 		
-		appService.scaleApp(app, release, formation);
+		appService.scaleApp(app, release, req);
 	}
 	
 //	@ResponseStatus(value=HttpStatus.INTERNAL_SERVER_ERROR, reason="internal server error")  // 409

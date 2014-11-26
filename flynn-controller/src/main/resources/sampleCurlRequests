@@ -1,34 +1,40 @@
-curl -d '' localhost:8080/apps/create/myapp
-curl localhost:8080/apps/get/myapp
-curl -H "Content-Type: application/json" -d '{"svnURL":"http://tc-svn.tencent.com/doss/doss_openapi_rep/openapi_proj/trunk/docker/flynn/flynn-demoapp"}' localhost:8080/apps/deploy/myapp
-curl localhost:8080/releases/get/app/myapp
-curl -H "Content-Type: application/json" -d '{"processes":{"web":2,"db":1}}' localhost:8080/apps/scale/myapp
+curl -d '' localhost:58080/apps/create/myapp
+curl localhost:58080/apps/get/myapp
+curl -H "Content-Type: application/json" -d '{"svnURL":"http://tc-svn.tencent.com/doss/doss_openapi_rep/openapi_proj/trunk/docker/flynn/flynn-demoapp"}' localhost:58080/apps/deploy/myapp
+curl localhost:58080/releases/get/app/myapp
+curl -H "Content-Type: application/json" -d '{"processes":{"web":2,"db":1}}' localhost:58080/apps/scale/myapp
 
 ###Test create app
-curl -d '' localhost:8080/apps/create/myapp
+curl -d '' localhost:58080/apps/create/myapp
 
-###Test add comment
+###Test deploy app : add comment
 curl -H "Content-Type: application/json" \
-	 -d '{"dockerImage":"docker.oa.com:8080/tegdsf/routercenter", "comment":"first deploy"}' \
-	 localhost:8080/apps/deploy/myapp
+	 -d '{"dockerImage":"docker.oa.com:58080/tegdsf/routercenter", "comment":"first deploy"}' \
+	 localhost:58080/apps/deploy/myapp
 
-###Test add process cmd
+###Test  deploy app : add process cmd
 curl -H "Content-Type: application/json" \
-	 -d '{"dockerImage":"docker.oa.com:8080/tegdsf/routercenter", "processCmd":{"web":"start web"}}' \
-	 localhost:8080/apps/deploy/myapp
+	 -d '{"dockerImage":"docker.oa.com:58080/tegdsf/routercenter", "processCmd":{"web":"start web"}}' \
+	 localhost:58080/apps/deploy/myapp
 
-###Test add process env
+###Test  deploy app : add process env
 curl -H "Content-Type: application/json" \
-	 -d '{"dockerImage":"docker.oa.com:8080/tegdsf/routercenter", "processEnv":{"web":{"URL":"url","MODE":"DEV"}}}' \
-	 localhost:8080/apps/deploy/myapp
+	 -d '{"dockerImage":"docker.oa.com:58080/tegdsf/routercenter", "processEnv":{"web":{"URL":"url","MODE":"DEV"}}}' \
+	 localhost:58080/apps/deploy/myapp
 
 	 
-###Test update process cmd
+###Test  deploy app : update process cmd
 curl -H "Content-Type: application/json" \
 	 -d '{"processCmd":{"web":"update web"}}' \
-	 localhost:8080/apps/deploy/myapp
+	 localhost:58080/apps/deploy/myapp
 	 
-###Test update process env
+###Test  deploy app : update process env
 curl -H "Content-Type: application/json" \
 	 -d '{"processEnv":{"web":{"URL":"url","MODE":"PROD"}}}' \
-	 localhost:8080/apps/deploy/myapp
+	 localhost:58080/apps/deploy/myapp
+	 
+	 
+###Test scale app
+curl -H "Content-Type: application/json" \
+     -d '{"processReplica":{"web":1}}' \
+     localhost:58080/apps/scale/myapp

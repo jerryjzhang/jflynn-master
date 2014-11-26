@@ -22,6 +22,7 @@ import com.tencent.jflynn.domain.Formation;
 import com.tencent.jflynn.domain.ProcessType;
 import com.tencent.jflynn.domain.Release;
 import com.tencent.jflynn.dto.DeployRequest;
+import com.tencent.jflynn.dto.ScaleRequest;
 import com.tencent.jflynn.service.AppService;
 import com.tencent.jflynn.utils.IdGenerator;
 import com.tencent.jflynn.utils.ShellCommandExecutor;
@@ -269,16 +270,46 @@ public class AppServiceImpl implements AppService {
 //		appDao.update(app);
 //	}
 	
-	public void scaleApp(App app, Release release, Formation formation){
-		formation.setAppID(app.getId());
+	public void scaleApp(App app, Release release, ScaleRequest req){
+		Formation formation = formationDao.queryByAppId(app.getId());
+		if(formation == null){
+			formation = new Formation();
+			formation.setAppID(app.getId());
+		}
+		
 		formation.setReleaseID(release.getId());
+		for(Map.Entry<String,Integer> e : req.getProcessReplica().entrySet()){
+			ProcessType ptype = release.getProcesses().get(e.getKey());
+			if(ptype == null)continue;
+			formation.getProcesses().put(e.getKey(), e.getValue());
+		}
 		formationDao.save(formation);
 		
-		for(Map.Entry<String,Integer> e : formation.getProcesses().entrySet()){
+		//simulate replicationController and agent logic
+		for(Map.Entry<String,Integer> e : req.getProcessReplica().entrySet()){
 			for(int i=1;i<=e.getValue();i++){
-				String cmd = "docker run -e SLUG_URL=" + release.getEnv().get("SLUG_URL") 
-						+ " " + slugRunnerImage + " " + release.getProcesses().get(e.getKey()).getCmd();
-				ShellCommandExecutor.execute(cmd);
+				ProcessType ptype = release.getProcesses().get(e.getKey());
+				if(ptype == null)continue;
+				StringBuilder cmd = new StringBuilder();
+				cmd.append("docker run -d -P ");
+				if(ptype.getEntrypoint() != null){
+					cmd.append(" -entrypoint " + ptype.getEntrypoint());
+					cmd.append(" ");
+				}
+				for(Map.Entry<String,String> env : release.getEnv().entrySet()){
+					cmd.append(" -e " + env.getKey() + "=" + env.getValue());
+					cmd.append(" ");
+				}
+				for(Map.Entry<String,String> env : ptype.getEnv().entrySet()){
+					cmd.append(" -e " + env.getKey() + "=" + env.getValue());
+					cmd.append(" ");
+				}
+				Artifact artifact = artifactDao.queryById(release.getArtifactID());
+				cmd.append(" " + artifact.getUri() + " ");
+				if(ptype.getCmd() != null){
+					cmd.append(" " + ptype.getCmd());
+				}
+				ShellCommandExecutor.execute(cmd.toString());
 			}
 		}
 	}
