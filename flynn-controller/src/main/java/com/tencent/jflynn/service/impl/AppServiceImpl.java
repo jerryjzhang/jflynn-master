@@ -1,6 +1,7 @@
 package com.tencent.jflynn.service.impl;
 
 import java.sql.Timestamp;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -193,37 +194,28 @@ public class AppServiceImpl implements AppService {
 			}
 		}
 	}
-//	
-//	public void deployApp(App app, AppRequest req){
+	
+//	public void handleSvnDeploy(App app, Release release, DeployRequest req){
 //		String fileName = app.getName() + "-" + System.currentTimeMillis();
-//		String appBasePath = "/tmp/" + fileName;
 //		
 //		//svn export code and create tarball
-//		//String cmd = "svn export " + req.getSvnURL() + " " + appBasePath;
-//		String cmd = "docker run -i -a stdout -a stderr -v /tmp:/tmp "
-//				+ "-e SVN_URL=" + req.getSvnURL() + " -e APP_NAME=" + fileName + " " + svnImage;
+//		String cmd = MessageFormat.format("docker run -i -v /tmp:/tmp -e SVN_URL={0} -e APP_NAME={1} {2}", 
+//				req.getSvnURL(), fileName, svnImage);
 //		ShellCommandExecutor.execute(cmd);
 //		
 //		//docker run slugbuilder to create slug.tgz
-//		cmd = "cat " + appBasePath + ".tar";
-//		PipedOutputStream out = new PipedOutputStream();
-//		ShellCommandExecutor.execute(cmd, null, out);
-//		PipedInputStream in = null;
-//		try{
-//		    in = new PipedInputStream(out);
-//		}catch(IOException e){
-//			e.printStackTrace();
-//			return;
-//		}
+//		cmd = MessageFormat.format("cat /tmp/{0}.tar |  "
+//				+ "docker run -i -e HTTP_SERVER_URL={1} "
+//				+ "-a stdin -a stdout -a stderr "
+//				+ "{2} {1}/slugs/{0}.tgz",
+//				fileName, httpServerUrl, slugBuilderImage);
 //		
-//		cmd = "docker run -i -e HTTP_SERVER_URL=" + httpServerUrl + 
-//				" -a stdin " + slugBuilderImage +
-//				" - > " + appBasePath + ".tgz";
-//		String output = ShellCommandExecutor.execute(cmd, in, null);
+//		String out = ShellCommandExecutor.execute("/bin/sh -c " + "\"" + cmd + "\"");
+//		System.out.println(out);
 //		//Grep output and extract process types
-//		Matcher m = PATTERN_TYPES.matcher(output);
+//		Matcher m = PATTERN_TYPES.matcher(out);
 //		String [] processTypes = null;
-//		if(m.matches()){
+//		if(m.find()){
 //			processTypes = m.group(1).split(", ");
 //		}
 //		
@@ -235,14 +227,8 @@ public class AppServiceImpl implements AppService {
 //		artifactDao.insert(artifact);
 //		LOG.info("Created artifact for appName=" + app.getName() + " artifact=" + artifact);
 //		
-//		Release release = new Release();
-//		release.setId(IdGenerator.generate());
-//		release.setAppID(app.getId());
 //		release.setArtifactID(artifact.getId());
-//		release.setTag(req.getComment());
-//		release.getEnv().put("SLUG_URL", httpServerUrl + "/slug/" + fileName + ".tgz");
-//		int lastestVersion = app.getLatestVersion();
-//		release.setVersion(lastestVersion + 1);
+//		release.getEnv().put("SLUG_URL", httpServerUrl + "/slugs/" + fileName + ".tgz");
 //		if(processTypes != null){
 //			for(String type : processTypes){
 //				type = type.trim();
@@ -251,13 +237,6 @@ public class AppServiceImpl implements AppService {
 //				release.getProcesses().put(type, ptype);
 //			}
 //		}
-//		releaseDao.insert(release);
-//		LOG.info("Created release for appName=" + app.getName() + " release=" + release);
-//		
-//		//set app current release to the newly created release
-//		app.setReleaseID(release.getId());
-//		app.setLatestVersion(release.getVersion());
-//		appDao.update(app);
 //	}
 	
 	public void scaleApp(App app, Release release, ScaleRequest req){
