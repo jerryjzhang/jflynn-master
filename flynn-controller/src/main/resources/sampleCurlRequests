@@ -7,19 +7,24 @@ curl -H "Content-Type: application/json" -d '{"processes":{"web":2,"db":1}}' loc
 ###Test create app
 curl -d '' localhost:58080/apps/create/myapp
 
+###Test deploy svn
+curl -H "Content-Type: application/json" \
+     -d '{"svnURL":"http://tc-svn.tencent.com/doss/doss_openapi_rep/openapi_proj/trunk/docker/flynn/flynn-demoapp"}' \
+     localhost:58080/apps/deploy/myapp
+
 ###Test deploy app : add comment
 curl -H "Content-Type: application/json" \
-	 -d '{"dockerImage":"docker.oa.com:58080/tegdsf/routercenter", "comment":"first deploy"}' \
+	 -d '{"dockerImage":"docker.oa.com:8080/tegdsf/dse", "comment":"first deploy"}' \
 	 localhost:58080/apps/deploy/myapp
 
 ###Test  deploy app : add process cmd
 curl -H "Content-Type: application/json" \
-	 -d '{"dockerImage":"docker.oa.com:58080/tegdsf/routercenter", "processCmd":{"web":"start web"}}' \
+	 -d '{"dockerImage":"docker.oa.com:8080/tegdsf/dse", "processCmd":{"web":"start web"}}' \
 	 localhost:58080/apps/deploy/myapp
 
 ###Test  deploy app : add process env
 curl -H "Content-Type: application/json" \
-	 -d '{"dockerImage":"docker.oa.com:58080/tegdsf/routercenter", "processEnv":{"web":{"URL":"url","MODE":"DEV"}}}' \
+	 -d '{"dockerImage":"docker.oa.com:8080/tegdsf/dse", "processEnv":{"web":{"URL":"url","MODE":"DEV"}}}' \
 	 localhost:58080/apps/deploy/myapp
 
 	 

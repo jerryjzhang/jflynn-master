@@ -31,7 +31,7 @@ public class ShellCommandExecutor {
 	}
 	
 	public static String execute(String cmd, File workDir, InputStream in, OutputStream out, Map<String,String> env){
-		if(!"DEV".equals(System.getenv("CONFIG_MODE"))){
+		if("DEV".equals(System.getenv("CONFIG_MODE"))){
 			CommandLine cl = CommandLine.parse(cmd);
 			System.out.println("Executing... " + cl);
 			return "Procfile declares types -> web, db \n";

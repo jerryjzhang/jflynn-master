@@ -51,7 +51,7 @@ public class AppServiceImpl implements AppService {
 	@Value("${slugBuildScript:slugBuild.sh}")
 	private String slugBuildScript;
 	
-	private static final Pattern PATTERN_TYPES = Pattern.compile(".*declares types.* -> (.+) \n");
+	private static final Pattern PATTERN_TYPES = Pattern.compile(".*declares types -> (.*)");
 	
 	public void createApp(App app){
 		appDao.insert(app);
@@ -59,16 +59,6 @@ public class AppServiceImpl implements AppService {
 	
 	public App getAppByName(String appName){
 		return appDao.queryByName(appName);
-	}
-	
-	public static void main(String [] args){
-		String out = "Procfile declares types -> web, db \n";
-		Matcher m = PATTERN_TYPES.matcher(out);
-		String [] processTypes = null;
-		if(m.matches()){
-			processTypes = m.group(1).split(", ");
-			System.out.println(processTypes);
-		}
 	}
 	
 	public void deployApp(App app, DeployRequest req){
@@ -180,7 +170,7 @@ public class AppServiceImpl implements AppService {
 		//Grep output and extract process types
 		Matcher m = PATTERN_TYPES.matcher(out);
 		String [] processTypes = null;
-		if(m.matches()){
+		if(m.find()){
 			processTypes = m.group(1).split(", ");
 		}
 		
