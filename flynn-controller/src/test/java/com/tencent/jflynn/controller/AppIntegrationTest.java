@@ -28,7 +28,7 @@ import com.tencent.jflynn.dto.ScaleRequest;
 @IntegrationTest("CONFIG_MODE:DEV")
 public class AppIntegrationTest {
 	private RestTemplate restTemplate = new TestRestTemplate();
-	private final String baseURL = "http://localhost:58080";
+	private final String baseURL = "http://localhost:8080";
 	
 	public AppIntegrationTest(){
 		

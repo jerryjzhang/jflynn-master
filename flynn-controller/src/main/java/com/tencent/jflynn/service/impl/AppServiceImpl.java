@@ -183,7 +183,7 @@ public class AppServiceImpl implements AppService {
 		LOG.info("Created artifact for appName=" + app.getName() + " artifact=" + artifact);
 		
 		release.setArtifactID(artifact.getId());
-		release.getEnv().put("SLUG_URL", httpServerUrl + "/slug/" + fileName + ".tgz");
+		release.getEnv().put("SLUG_URL", httpServerUrl + "/slugs/" + fileName + ".tgz");
 		if(processTypes != null){
 			for(String type : processTypes){
 				type = type.trim();
