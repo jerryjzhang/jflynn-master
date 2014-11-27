@@ -61,7 +61,7 @@ public class AppServiceImpl implements AppService {
 		return appDao.queryByName(appName);
 	}
 	
-	public void deployApp(App app, DeployRequest req){
+	public Release deployApp(App app, DeployRequest req){
 		Release release = null;
 		if(app.getReleaseID() != null){
 			release = releaseDao.queryById(app.getReleaseID());
@@ -141,6 +141,8 @@ public class AppServiceImpl implements AppService {
 		LOG.info("Created release for appName=" + app.getName() + " release=" + release);
 		appDao.update(app);
 		LOG.info("Updated appName=" + app.getName() + " set current releaseId=" + app.getReleaseID());
+		
+		return release;
 	}
 	
 	private void handleImageDeploy(App app, Release release, DeployRequest req){

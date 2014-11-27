@@ -50,13 +50,15 @@ public class AppController {
 	}
 	
 	@RequestMapping(value="/deploy/{appName}", method=RequestMethod.POST, consumes="application/json")
-	public void deploy(@PathVariable("appName") String appName,
+	public String deploy(@PathVariable("appName") String appName,
 			@RequestBody DeployRequest req){
 		App app = appService.getAppByName(appName);
     	if(app == null){
     		throw new ObjectNotFoundException();
     	}
-    	appService.deployApp(app, req);
+    	Release release = appService.deployApp(app, req);
+    	
+    	return release.getId();
 	}
 	
 	@RequestMapping(value="/scale/{appName}", method=RequestMethod.POST, consumes="application/json")
