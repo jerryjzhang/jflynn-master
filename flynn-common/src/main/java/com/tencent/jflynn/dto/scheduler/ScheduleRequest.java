@@ -8,6 +8,7 @@ import com.tencent.jflynn.domain.Program;
 public class ScheduleRequest {
 	private String appName;
 	private String imageUri;
+	private Map<String,String> appEnv = new HashMap<String,String>();
 	private Map<String,Program> programs = new HashMap<String,Program>();
 	private Map<String,Integer> programReplica = new HashMap<String,Integer>();
 	
@@ -22,6 +23,12 @@ public class ScheduleRequest {
 	}
 	public void setImageUri(String imageUri) {
 		this.imageUri = imageUri;
+	}
+	public Map<String, String> getAppEnv() {
+		return appEnv;
+	}
+	public void setAppEnv(Map<String, String> appEnv) {
+		this.appEnv = appEnv;
 	}
 	public Map<String, Program> getPrograms() {
 		return programs;
