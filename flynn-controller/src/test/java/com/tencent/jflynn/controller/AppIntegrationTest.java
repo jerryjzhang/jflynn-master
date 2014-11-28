@@ -17,10 +17,8 @@ import org.springframework.web.client.RestTemplate;
 
 import com.tencent.jflynn.boot.JFlynnMain;
 import com.tencent.jflynn.domain.App;
-import com.tencent.jflynn.domain.Formation;
 import com.tencent.jflynn.domain.Release;
 import com.tencent.jflynn.dto.DeployRequest;
-import com.tencent.jflynn.dto.ScaleRequest;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = JFlynnMain.class)
@@ -192,29 +190,29 @@ public class AppIntegrationTest {
 				release.getPrograms().get("web").getEnv().get("URL"));
 	}
 	
-	@Test
-	public void testScaleApp(){
-		//deploy app
-		DeployRequest req = new DeployRequest();
-		req.setDockerImage("tegdsf/routercenter");
-		req.setProgramEnv(new HashMap<String, Map<String,String>>());
-		req.getProgramEnv().put("web", new HashMap<String,String>());
-		req.getProgramEnv().get("web").put("URL", "http://dsf");
-		restTemplate.postForEntity(baseURL+"/apps/deploy/"+appName, req, Void.class);
-		
-		//scale app
-		ScaleRequest sreq = new ScaleRequest();
-		sreq.setProgramReplica(new HashMap<String,Integer>());
-		sreq.getProgramReplica().put("web", 1);
-		restTemplate.postForEntity(baseURL+"/apps/scale/"+appName, sreq, Void.class);
-		
-		//get app formation and check
-		Formation formation = restTemplate.getForEntity(baseURL+"/formations/get/app/"+appName, Formation.class).getBody();
-		assertNotNull(formation);
-		assertNotNull(formation.getAppID());
-		assertNotNull(formation.getReleaseID());
-		assertTrue(formation.getProgramReplica().size() > 0);
-		assertEquals(sreq.getProgramReplica().get("web"), 
-				formation.getProgramReplica().get("web"));
-	}
+//	@Test
+//	public void testScaleApp(){
+//		//deploy app
+//		DeployRequest req = new DeployRequest();
+//		req.setDockerImage("tegdsf/routercenter");
+//		req.setProgramEnv(new HashMap<String, Map<String,String>>());
+//		req.getProgramEnv().put("web", new HashMap<String,String>());
+//		req.getProgramEnv().get("web").put("URL", "http://dsf");
+//		restTemplate.postForEntity(baseURL+"/apps/deploy/"+appName, req, Void.class);
+//		
+//		//scale app
+//		ScaleRequest sreq = new ScaleRequest();
+//		sreq.setProgramReplica(new HashMap<String,Integer>());
+//		sreq.getProgramReplica().put("web", 1);
+//		restTemplate.postForEntity(baseURL+"/apps/scale/"+appName, sreq, Void.class);
+//		
+//		//get app formation and check
+//		Formation formation = restTemplate.getForEntity(baseURL+"/formations/get/app/"+appName, Formation.class).getBody();
+//		assertNotNull(formation);
+//		assertNotNull(formation.getAppID());
+//		assertNotNull(formation.getReleaseID());
+//		assertTrue(formation.getProgramReplica().size() > 0);
+//		assertEquals(sreq.getProgramReplica().get("web"), 
+//				formation.getProgramReplica().get("web"));
+//	}
 }

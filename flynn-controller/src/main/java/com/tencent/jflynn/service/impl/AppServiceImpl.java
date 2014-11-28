@@ -25,6 +25,7 @@ import com.tencent.jflynn.domain.Program;
 import com.tencent.jflynn.domain.Release;
 import com.tencent.jflynn.dto.DeployRequest;
 import com.tencent.jflynn.dto.ScaleRequest;
+import com.tencent.jflynn.dto.scheduler.ExtendedProgram;
 import com.tencent.jflynn.dto.scheduler.ScheduleRequest;
 import com.tencent.jflynn.exception.ObjectNotFoundException;
 import com.tencent.jflynn.service.AppService;
@@ -58,6 +59,8 @@ public class AppServiceImpl implements AppService {
 	private String slugBuildScript;
 	@Value("${schedulerUrl}")
 	private String schedulerUrl;
+	@Value("${workMode:standalone}")
+	private String workMode;
 	
 	private static final Pattern PATTERN_TYPES = Pattern.compile(".*declares types -> (.*)");
 	
@@ -205,63 +208,71 @@ public class AppServiceImpl implements AppService {
 	}
 	
 	public void scaleApp(App app, Release release, ScaleRequest req){
+		if("standalone".equals(workMode)){
+			scaleAppLocal(app, release, req);
+			return;
+		}
+		
 		ScheduleRequest sreq = new ScheduleRequest();
 		Artifact artifact = artifactDao.queryById(release.getArtifactID());
 		sreq.setAppName(app.getName());
 		sreq.setAppEnv(release.getAppEnv());
 		sreq.setImageUri(artifact.getUri());
-		sreq.setProgramReplica(req.getProgramReplica());
-		for(String program : req.getProgramReplica().keySet()){
-			sreq.getPrograms().put(program, release.getPrograms().get(program));
+		for(Map.Entry<String,Integer> e : req.getProgramReplica().entrySet()){
+			String programName = e.getKey();
+			ExtendedProgram ep = new ExtendedProgram();
+			ep.setReplica(e.getValue());
+			ep.setProgram(release.getPrograms().get(programName));
+			sreq.getPrograms().put(programName, ep);
 		}
 		
 		restTemplate.postForEntity(schedulerUrl+"/", sreq, Boolean.class);
 		LOG.info("Scheduled programs for appName=" + app.getName());
 	}
 	
-//	public void scaleApp(App app, Release release, ScaleRequest req){
-//		Formation formation = formationDao.queryByAppId(app.getId());
-//		if(formation == null){
-//			formation = new Formation();
-//			formation.setAppID(app.getId());
-//		}
-//		
-//		formation.setReleaseID(release.getId());
-//		for(Map.Entry<String,Integer> e : req.getProgramReplica().entrySet()){
-//			Program ptype = release.getPrograms().get(e.getKey());
-//			if(ptype == null)continue;
-//			formation.getProgramReplica().put(e.getKey(), e.getValue());
-//		}
-//		formationDao.save(formation);
-//		
-//		//simulate replicationController and agent logic
-//		for(Map.Entry<String,Integer> e : req.getProgramReplica().entrySet()){
-//			for(int i=1;i<=e.getValue();i++){
-//				Program ptype = release.getPrograms().get(e.getKey());
-//				if(ptype == null)continue;
-//				StringBuilder cmd = new StringBuilder();
-//				cmd.append("docker run -d -P ");
-//				if(ptype.getEntrypoint() != null){
-//					cmd.append(" -entrypoint " + ptype.getEntrypoint());
-//					cmd.append(" ");
-//				}
-//				for(Map.Entry<String,String> env : release.getAppEnv().entrySet()){
-//					cmd.append(" -e " + env.getKey() + "=" + env.getValue());
-//					cmd.append(" ");
-//				}
-//				for(Map.Entry<String,String> env : ptype.getEnv().entrySet()){
-//					cmd.append(" -e " + env.getKey() + "=" + env.getValue());
-//					cmd.append(" ");
-//				}
-//				Artifact artifact = artifactDao.queryById(release.getArtifactID());
-//				cmd.append(" " + artifact.getUri() + " ");
-//				if(ptype.getCmd() != null){
-//					cmd.append(" " + ptype.getCmd());
-//				}
-//				ShellCommandExecutor.execute(cmd.toString());
-//			}
-//		}
-//	}
+	public void scaleAppLocal(App app, Release release, ScaleRequest req){
+		Formation formation = formationDao.queryByAppId(app.getId());
+		if(formation == null){
+			formation = new Formation();
+			formation.setAppID(app.getId());
+		}
+		
+		formation.setReleaseID(release.getId());
+		for(Map.Entry<String,Integer> e : req.getProgramReplica().entrySet()){
+			Program ptype = release.getPrograms().get(e.getKey());
+			if(ptype == null)continue;
+			formation.getProgramReplica().put(e.getKey(), e.getValue());
+		}
+		formationDao.save(formation);
+		
+		//simulate replicationController and agent logic
+		for(Map.Entry<String,Integer> e : req.getProgramReplica().entrySet()){
+			for(int i=1;i<=e.getValue();i++){
+				Program ptype = release.getPrograms().get(e.getKey());
+				if(ptype == null)continue;
+				StringBuilder cmd = new StringBuilder();
+				cmd.append("docker run -d -P ");
+				if(ptype.getEntrypoint() != null){
+					cmd.append(" -entrypoint " + ptype.getEntrypoint());
+					cmd.append(" ");
+				}
+				for(Map.Entry<String,String> env : release.getAppEnv().entrySet()){
+					cmd.append(" -e " + env.getKey() + "=" + env.getValue());
+					cmd.append(" ");
+				}
+				for(Map.Entry<String,String> env : ptype.getEnv().entrySet()){
+					cmd.append(" -e " + env.getKey() + "=" + env.getValue());
+					cmd.append(" ");
+				}
+				Artifact artifact = artifactDao.queryById(release.getArtifactID());
+				cmd.append(" " + artifact.getUri() + " ");
+				if(ptype.getCmd() != null){
+					cmd.append(" " + ptype.getCmd());
+				}
+				ShellCommandExecutor.execute(cmd.toString());
+			}
+		}
+	}
 	
 	public List<Release> getAppReleases(App app) {
 		return releaseDao.queryByAppId(app.getId());
