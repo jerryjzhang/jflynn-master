@@ -30,12 +30,12 @@ curl -H "Content-Type: application/json" \
 	 
 ###Test  deploy app : update process cmd
 curl -H "Content-Type: application/json" \
-	 -d '{"processCmd":{"web":"update web"}}' \
+	 -d '{"programCmd":{"web":"update web"}}' \
 	 localhost:58080/apps/deploy/myapp
 	 
 ###Test  deploy app : update process env
 curl -H "Content-Type: application/json" \
-	 -d '{"processEnv":{"web":{"URL":"url","MODE":"PROD"}}}' \
+	 -d '{"programEnv":{"web":{"URL":"url","MODE":"PROD"}}}' \
 	 localhost:58080/apps/deploy/myapp
 	 
 	 

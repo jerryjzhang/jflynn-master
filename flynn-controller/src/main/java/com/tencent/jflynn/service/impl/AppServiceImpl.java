@@ -25,6 +25,7 @@ import com.tencent.jflynn.domain.Program;
 import com.tencent.jflynn.domain.Release;
 import com.tencent.jflynn.dto.DeployRequest;
 import com.tencent.jflynn.dto.ScaleRequest;
+import com.tencent.jflynn.dto.StopAppRequest;
 import com.tencent.jflynn.dto.scheduler.ExtendedProgram;
 import com.tencent.jflynn.dto.scheduler.ScheduleRequest;
 import com.tencent.jflynn.exception.ObjectNotFoundException;
@@ -226,8 +227,8 @@ public class AppServiceImpl implements AppService {
 			sreq.getPrograms().put(programName, ep);
 		}
 		
-		restTemplate.postForEntity(schedulerUrl+"/", sreq, Boolean.class);
-		LOG.info("Scheduled programs for appName=" + app.getName());
+		String success = restTemplate.postForEntity(schedulerUrl+"/apps/scale/"+app.getName(), sreq, String.class).getBody();
+		LOG.info("Scheduled programs for appName=" + app.getName() + " response: " + success);
 	}
 	
 	public void scaleAppLocal(App app, Release release, ScaleRequest req){
@@ -282,37 +283,60 @@ public class AppServiceImpl implements AppService {
 		return formationDao.queryByAppId(appId);
 	}
 
-	public void stopApp(App app, Release release) {
-		Map<String, Program> programs = release.getPrograms();
-		if (programs == null || programs.size() == 0) {
-			return;
+	public boolean stopApp(App app, StopAppRequest request) {
+		Release release = releaseDao.queryById(app.getReleaseID());
+		if (release == null) {
+			throw new ObjectNotFoundException();
 		}
 		
-		/* TODO: should call gaia API to stop programs. */
-		ScaleRequest request = new ScaleRequest();
-		Map<String, Integer> replicas = new HashMap<String, Integer>();
-		Set<String> programNames = programs.keySet();
-		for (String programName : programNames) {			
-			replicas.put(programName, 0);
+		/* Stop the whole app. */
+		if (request == null) {
+			Map<String, Program> programs = release.getPrograms();
+			if (programs == null || programs.size() == 0) {
+				return false;
+			}
+		
+			/* TODO: should call gaia API to stop programs. */
+			ScaleRequest scaleRequest = new ScaleRequest();
+			Map<String, Integer> replicas = new HashMap<String, Integer>();
+			Set<String> programNames = programs.keySet();
+			for (String programName : programNames) {			
+				replicas.put(programName, 0);
+			}
+			scaleRequest.setProgramReplica(replicas);
+			
+			scaleApp(app, release, scaleRequest);
+			
+			return true;
 		}
-		request.setProgramReplica(replicas);
 		
-		scaleApp(app, release, request);
-	}
-
-	public void stopAppProgram(App app, Release release, String programName) {
-		Map<String, Program> programs = release.getPrograms();
-		if (programs == null || programs.size() == 0) {
-			return;
+		/* No program or container is specified to stop, which is illegal. */
+		if (request.getProgramName() == null && request.getContainerId() == null) {
+			return false;
 		}
 		
-		/* TODO: should call gaia API to stop this program. */
-		ScaleRequest request = new ScaleRequest();
-		Map<String, Integer> replicas = new HashMap<String, Integer>();
-		replicas.put(programName, 0);
-		request.setProgramReplica(replicas);
+		/* Stop a program for an application. */
+		if (request.isStopProgram()) {
+			Map<String, Program> programs = release.getPrograms();
+			if (programs == null || programs.size() == 0) {
+				return false;
+			}
+			
+			/* TODO: should call gaia API to stop this program. */
+			ScaleRequest scaleRequest = new ScaleRequest();
+			Map<String, Integer> replicas = new HashMap<String, Integer>();
+			replicas.put(request.getProgramName(), 0);
+			scaleRequest.setProgramReplica(replicas);
+			
+			scaleApp(app, release, scaleRequest);
+		}
 		
-		scaleApp(app, release, request);
+		/* Stop a specified container. */
+		if (request.isStopContainer()) {
+			/* TODO: wait for layer0 API. */
+		}
+		
+		return false;
 	}
 
 	public boolean rollback(App app, int version) {
@@ -388,5 +412,5 @@ public class AppServiceImpl implements AppService {
 		
 		/* TODO: currently always return true, should depend on the deploy result. */
 		return true;
-	}	
+	}		
 }

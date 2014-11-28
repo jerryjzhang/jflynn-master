@@ -13,6 +13,7 @@ import com.tencent.jflynn.domain.App;
 import com.tencent.jflynn.domain.Release;
 import com.tencent.jflynn.dto.DeployRequest;
 import com.tencent.jflynn.dto.ScaleRequest;
+import com.tencent.jflynn.dto.StopAppRequest;
 import com.tencent.jflynn.exception.ObjectNotFoundException;
 import com.tencent.jflynn.service.AppService;
 import com.tencent.jflynn.service.ReleaseService;
@@ -77,35 +78,14 @@ public class AppController {
 	
 	/* Stop an application. */
 	@RequestMapping(value="/stop/{appName}")
-	public void stopApp(@PathVariable("appName") String appName) {
+	public void stopApp(@PathVariable("appName") String appName,
+			            @RequestBody StopAppRequest request) {
 		App app = appService.getAppByName(appName);
 		if (app == null) {
 			throw new ObjectNotFoundException();
 		}
 		
-		Release release = releaseService.getReleaseById(app.getReleaseID());
-		if (release == null) {
-			throw new ObjectNotFoundException();
-		}
-		
-		appService.stopApp(app, release);		
-	}
-	
-	/* Stop a program for an application. */
-	@RequestMapping(value="/stop/{appName}/{programName}")
-	public void stopAppProgram(@PathVariable("appName") String appName, 
-			                   @PathVariable("programName") String programName) {
-		App app = appService.getAppByName(appName);
-		if (app == null) {
-			throw new ObjectNotFoundException();
-		}
-		
-		Release release = releaseService.getReleaseById(app.getReleaseID());
-		if (release == null) {
-			throw new ObjectNotFoundException();
-		}
-		
-		appService.stopAppProgram(app, release, programName);		
+		appService.stopApp(app, request);				
 	}
 	
 	/* Rollback the current application to an old version. */
