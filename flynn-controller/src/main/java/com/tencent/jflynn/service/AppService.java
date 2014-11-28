@@ -13,4 +13,7 @@ public interface AppService {
 	public Release deployApp(App app, DeployRequest req);
 	public List<Release> getAppReleases(App app);
 	public void scaleApp(App app, Release release, ScaleRequest req);
+	public void stopApp(App app, Release release);
+	public void stopAppProgram(App app, Release release, String programName);
+	public boolean rollback(App app, int version);
 }

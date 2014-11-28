@@ -19,12 +19,12 @@ curl -H "Content-Type: application/json" \
 
 ###Test  deploy app : add process cmd
 curl -H "Content-Type: application/json" \
-	 -d '{"dockerImage":"docker.oa.com:8080/tegdsf/dse", "processCmd":{"web":"start web"}}' \
+	 -d '{"dockerImage":"docker.oa.com:8080/tegdsf/dse", "programCmd":{"web":"start web"}}' \
 	 localhost:58080/apps/deploy/myapp
 
 ###Test  deploy app : add process env
 curl -H "Content-Type: application/json" \
-	 -d '{"dockerImage":"docker.oa.com:8080/tegdsf/dse", "processEnv":{"web":{"URL":"url","MODE":"DEV"}}}' \
+	 -d '{"dockerImage":"docker.oa.com:8080/tegdsf/dse", "programEnv":{"web":{"URL":"url","MODE":"DEV"}}}' \
 	 localhost:58080/apps/deploy/myapp
 
 	 
@@ -41,5 +41,5 @@ curl -H "Content-Type: application/json" \
 	 
 ###Test scale app
 curl -H "Content-Type: application/json" \
-     -d '{"processReplica":{"web":1}}' \
+     -d '{"programReplica":{"web":1}}' \
      localhost:58080/apps/scale/myapp

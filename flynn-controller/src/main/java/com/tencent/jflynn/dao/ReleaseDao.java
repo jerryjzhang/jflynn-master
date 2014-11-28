@@ -8,4 +8,5 @@ public interface ReleaseDao {
 	public void insert(Release release);
 	public List<Release> queryByAppId(String appID);
 	public Release queryById(String id);
+	public Release queryByAppIdAndVersion(String appId, int version);
 }

@@ -25,7 +25,7 @@ public class AppController {
 	private AppService appService;
 	
 	@Autowired
-	private ReleaseService releaesService;
+	private ReleaseService releaseService;
 	
 	@RequestMapping("/get/{appName}")
     public App get(@PathVariable("appName") String appName) {
@@ -68,11 +68,56 @@ public class AppController {
 		Release release = null;
 		if(app == null || 
 				app.getReleaseID() == null || 
-				(release = releaesService.getReleaseById(app.getReleaseID())) == null){
+				(release = releaseService.getReleaseById(app.getReleaseID())) == null){
 			throw new ObjectNotFoundException();
 		}
 		
 		appService.scaleApp(app, release, req);
+	}
+	
+	/* Stop an application. */
+	@RequestMapping(value="/stop/{appName}")
+	public void stopApp(@PathVariable("appName") String appName) {
+		App app = appService.getAppByName(appName);
+		if (app == null) {
+			throw new ObjectNotFoundException();
+		}
+		
+		Release release = releaseService.getReleaseById(app.getReleaseID());
+		if (release == null) {
+			throw new ObjectNotFoundException();
+		}
+		
+		appService.stopApp(app, release);		
+	}
+	
+	/* Stop a program for an application. */
+	@RequestMapping(value="/stop/{appName}/{programName}")
+	public void stopAppProgram(@PathVariable("appName") String appName, 
+			                   @PathVariable("programName") String programName) {
+		App app = appService.getAppByName(appName);
+		if (app == null) {
+			throw new ObjectNotFoundException();
+		}
+		
+		Release release = releaseService.getReleaseById(app.getReleaseID());
+		if (release == null) {
+			throw new ObjectNotFoundException();
+		}
+		
+		appService.stopAppProgram(app, release, programName);		
+	}
+	
+	/* Rollback the current application to an old version. */
+	@RequestMapping(value="/rollback/{appName}/{version}")
+	public boolean rollback(@PathVariable("appName") String appName,
+			                @PathVariable("version") int version) {
+		App app = appService.getAppByName(appName);
+		if (app == null) {
+			throw new ObjectNotFoundException();
+		}
+		
+		return appService.rollback(app, version);
 	}
 	
 //	@ResponseStatus(value=HttpStatus.INTERNAL_SERVER_ERROR, reason="internal server error")  // 409
