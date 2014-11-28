@@ -4,7 +4,7 @@ import java.util.Map;
 
 public class DeployRequest {
 	private String svnURL;
-	private String dockerImage;
+	private String imageURI;
 	private Map<String,String> appEnv;
 	private Map<String,String> programCmd;
 	private Map<String,String> programEpt;
@@ -18,11 +18,11 @@ public class DeployRequest {
 	public void setSvnURL(String svnURL) {
 		this.svnURL = svnURL;
 	}
-	public String getDockerImage() {
-		return dockerImage;
+	public String getImageURI() {
+		return imageURI;
 	}
-	public void setDockerImage(String dockerImage) {
-		this.dockerImage = dockerImage;
+	public void setImageURI(String dockerImage) {
+		this.imageURI = dockerImage;
 	}
 	public String getComment() {
 		return comment;

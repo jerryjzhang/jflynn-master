@@ -79,7 +79,7 @@ public class AppIntegrationTest {
 	public void testDeployAppWithImage(){
 		//deploy app
 		DeployRequest req = new DeployRequest();
-		req.setDockerImage("tegdsf/routercenter");
+		req.setImageURI("tegdsf/routercenter");
 		req.setComment("deploy new code");
 		restTemplate.postForEntity(baseURL+"/apps/deploy/"+appName, req, Void.class);
 		
@@ -101,7 +101,7 @@ public class AppIntegrationTest {
 	public void testDeployAppWithRelEnv(){
 		//deploy app
 		DeployRequest req = new DeployRequest();
-		req.setDockerImage("tegdsf/routercenter");
+		req.setImageURI("tegdsf/routercenter");
 		req.setAppEnv(new HashMap<String,String>());
 		req.getAppEnv().put("URL", "http://dsf");
 		restTemplate.postForEntity(baseURL+"/apps/deploy/"+appName, req, Void.class);
@@ -124,7 +124,7 @@ public class AppIntegrationTest {
 	public void testDeployAppWithProcCmd(){
 		//deploy app
 		DeployRequest req = new DeployRequest();
-		req.setDockerImage("tegdsf/routercenter");
+		req.setImageURI("tegdsf/routercenter");
 		req.setProgramCmd(new HashMap<String,String>());
 		req.getProgramCmd().put("web", "new cmd");
 		restTemplate.postForEntity(baseURL+"/apps/deploy/"+appName, req, Void.class);
@@ -147,7 +147,7 @@ public class AppIntegrationTest {
 	public void testDeployAppWithProcEpt(){
 		//deploy app
 		DeployRequest req = new DeployRequest();
-		req.setDockerImage("tegdsf/routercenter");
+		req.setImageURI("tegdsf/routercenter");
 		req.setProgramEpt(new HashMap<String,String>());
 		req.getProgramEpt().put("web", "new entrypoint");
 		
@@ -170,7 +170,7 @@ public class AppIntegrationTest {
 	public void testDeployAppWithProcEnv(){
 		//deploy app
 		DeployRequest req = new DeployRequest();
-		req.setDockerImage("tegdsf/routercenter");
+		req.setImageURI("tegdsf/routercenter");
 		req.setProgramEnv(new HashMap<String, Map<String,String>>());
 		req.getProgramEnv().put("web", new HashMap<String,String>());
 		req.getProgramEnv().get("web").put("URL", "http://dsf");

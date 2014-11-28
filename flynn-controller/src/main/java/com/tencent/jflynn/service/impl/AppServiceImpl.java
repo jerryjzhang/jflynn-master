@@ -4,7 +4,6 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,7 +11,6 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import com.tencent.jflynn.dao.AppDao;
 import com.tencent.jflynn.dao.ArtifactDao;
@@ -30,6 +28,7 @@ import com.tencent.jflynn.dto.scheduler.ExtendedProgram;
 import com.tencent.jflynn.dto.scheduler.ScheduleRequest;
 import com.tencent.jflynn.exception.ObjectNotFoundException;
 import com.tencent.jflynn.service.AppService;
+import com.tencent.jflynn.service.SchedulerService;
 import com.tencent.jflynn.utils.IdGenerator;
 import com.tencent.jflynn.utils.ShellCommandExecutor;
 
@@ -45,23 +44,19 @@ public class AppServiceImpl implements AppService {
 	private ArtifactDao artifactDao;
 	@Autowired
 	private FormationDao formationDao;
+	@Autowired
+	private SchedulerService scheduler;
 	
-	private RestTemplate restTemplate = new RestTemplate();
-	
-	@Value("${httpServerUrl:http://192.168.19.131:8000}")
+	@Value("${httpServerUrl}")
 	private String httpServerUrl;
 	@Value("${svnImage:tegdsf/svn}")
 	private String svnImage;
-	@Value("${slugBuilderImage:flynn/slugbuilder}")
+	@Value("${slugBuilderImage:tegdsf/slugbuilder}")
 	private String slugBuilderImage;
-	@Value("${slugRunnerImage:flynn/slugrunner}")
+	@Value("${slugRunnerImage:tegdsf/slugrunner}")
 	private String slugRunnerImage;
 	@Value("${slugBuildScript:slugBuild.sh}")
 	private String slugBuildScript;
-	@Value("${schedulerUrl}")
-	private String schedulerUrl;
-	@Value("${workMode:standalone}")
-	private String workMode;
 	
 	private static final Pattern PATTERN_TYPES = Pattern.compile(".*declares types -> (.*)");
 	
@@ -92,7 +87,7 @@ public class AppServiceImpl implements AppService {
 		//build new artifact if either svnURL or dockerImage is specified
 		if(req.getSvnURL() != null){
 			handleSvnDeploy(app, release, req);
-		}else if(req.getDockerImage() != null){
+		}else if(req.getImageURI() != null){
 			handleImageDeploy(app, release, req);
 		}
 		
@@ -110,6 +105,7 @@ public class AppServiceImpl implements AppService {
 				Program procType = release.getPrograms().get(procName);
 				if(procType == null){
 					procType = new Program();
+					procType.setName(procName);
 					release.getPrograms().put(procName, procType);
 				}
 				procType.setCmd(e.getValue());
@@ -123,6 +119,7 @@ public class AppServiceImpl implements AppService {
 				Program procType = release.getPrograms().get(procName);
 				if(procType == null){
 					procType = new Program();
+					procType.setName(procName);
 					release.getPrograms().put(procName, procType);
 				}
 				procType.setEntrypoint(e.getValue());
@@ -136,6 +133,7 @@ public class AppServiceImpl implements AppService {
 				Program procType = release.getPrograms().get(procName);
 				if(procType == null){
 					procType = new Program();
+					procType.setName(procName);
 					release.getPrograms().put(procName, procType);
 				}
 				for(Map.Entry<String, String> env : e.getValue().entrySet()){
@@ -146,7 +144,9 @@ public class AppServiceImpl implements AppService {
 		
 		//if no processes in the release, create a "default" one
 		if(release.getPrograms().size() == 0){
-			release.getPrograms().put("default", new Program());
+			Program p = new Program();
+			p.setName("default");
+			release.getPrograms().put(p.getName(), p);
 		}
 		
 		releaseDao.insert(release);
@@ -161,7 +161,7 @@ public class AppServiceImpl implements AppService {
 		//create artifact and release object
 		Artifact artifact = new Artifact();
 		artifact.setId(IdGenerator.generate());
-		artifact.setUri(req.getDockerImage());
+		artifact.setUri(req.getImageURI());
 		artifact.setCreateTime(new Timestamp(System.currentTimeMillis()));
 		artifactDao.insert(artifact);
 		LOG.info("Created artifact for appName=" + app.getName() + " artifact=" + artifact);
@@ -202,6 +202,7 @@ public class AppServiceImpl implements AppService {
 			for(String type : processTypes){
 				type = type.trim();
 				Program ptype = new Program();
+				ptype.setName(type);
 				ptype.setCmd("start " + type);
 				release.getPrograms().put(type, ptype);
 			}
@@ -209,11 +210,6 @@ public class AppServiceImpl implements AppService {
 	}
 	
 	public void scaleApp(App app, Release release, ScaleRequest req){
-		if("standalone".equals(workMode)){
-			scaleAppLocal(app, release, req);
-			return;
-		}
-		
 		ScheduleRequest sreq = new ScheduleRequest();
 		Artifact artifact = artifactDao.queryById(release.getArtifactID());
 		sreq.setAppName(app.getName());
@@ -227,54 +223,10 @@ public class AppServiceImpl implements AppService {
 			sreq.getPrograms().put(programName, ep);
 		}
 		
-		String success = restTemplate.postForEntity(schedulerUrl+"/apps/scale/"+app.getName(), sreq, String.class).getBody();
-		LOG.info("Scheduled programs for appName=" + app.getName() + " response: " + success);
+		scheduler.schedule(sreq);
+		LOG.info("Scheduled programs for appName=" + app.getName());
 	}
-	
-	public void scaleAppLocal(App app, Release release, ScaleRequest req){
-		Formation formation = formationDao.queryByAppId(app.getId());
-		if(formation == null){
-			formation = new Formation();
-			formation.setAppID(app.getId());
-		}
-		
-		formation.setReleaseID(release.getId());
-		for(Map.Entry<String,Integer> e : req.getProgramReplica().entrySet()){
-			Program ptype = release.getPrograms().get(e.getKey());
-			if(ptype == null)continue;
-			formation.getProgramReplica().put(e.getKey(), e.getValue());
-		}
-		formationDao.save(formation);
-		
-		//simulate replicationController and agent logic
-		for(Map.Entry<String,Integer> e : req.getProgramReplica().entrySet()){
-			for(int i=1;i<=e.getValue();i++){
-				Program ptype = release.getPrograms().get(e.getKey());
-				if(ptype == null)continue;
-				StringBuilder cmd = new StringBuilder();
-				cmd.append("docker run -d -P ");
-				if(ptype.getEntrypoint() != null){
-					cmd.append(" -entrypoint " + ptype.getEntrypoint());
-					cmd.append(" ");
-				}
-				for(Map.Entry<String,String> env : release.getAppEnv().entrySet()){
-					cmd.append(" -e " + env.getKey() + "=" + env.getValue());
-					cmd.append(" ");
-				}
-				for(Map.Entry<String,String> env : ptype.getEnv().entrySet()){
-					cmd.append(" -e " + env.getKey() + "=" + env.getValue());
-					cmd.append(" ");
-				}
-				Artifact artifact = artifactDao.queryById(release.getArtifactID());
-				cmd.append(" " + artifact.getUri() + " ");
-				if(ptype.getCmd() != null){
-					cmd.append(" " + ptype.getCmd());
-				}
-				ShellCommandExecutor.execute(cmd.toString());
-			}
-		}
-	}
-	
+
 	public List<Release> getAppReleases(App app) {
 		return releaseDao.queryByAppId(app.getId());
 	}
@@ -283,60 +235,12 @@ public class AppServiceImpl implements AppService {
 		return formationDao.queryByAppId(appId);
 	}
 
-	public boolean stopApp(App app, StopAppRequest request) {
-		Release release = releaseDao.queryById(app.getReleaseID());
-		if (release == null) {
-			throw new ObjectNotFoundException();
+	public void stopApp(App app, StopAppRequest req) {
+		if(req != null && req.getProgramName() != null){
+			scheduler.stopProgram(req.getProgramName());
+		}else{
+			scheduler.stopApp(app.getName());
 		}
-		
-		/* Stop the whole app. */
-		if (request == null) {
-			Map<String, Program> programs = release.getPrograms();
-			if (programs == null || programs.size() == 0) {
-				return false;
-			}
-		
-			/* TODO: should call gaia API to stop programs. */
-			ScaleRequest scaleRequest = new ScaleRequest();
-			Map<String, Integer> replicas = new HashMap<String, Integer>();
-			Set<String> programNames = programs.keySet();
-			for (String programName : programNames) {			
-				replicas.put(programName, 0);
-			}
-			scaleRequest.setProgramReplica(replicas);
-			
-			scaleApp(app, release, scaleRequest);
-			
-			return true;
-		}
-		
-		/* No program or container is specified to stop, which is illegal. */
-		if (request.getProgramName() == null && request.getContainerId() == null) {
-			return false;
-		}
-		
-		/* Stop a program for an application. */
-		if (request.isStopProgram()) {
-			Map<String, Program> programs = release.getPrograms();
-			if (programs == null || programs.size() == 0) {
-				return false;
-			}
-			
-			/* TODO: should call gaia API to stop this program. */
-			ScaleRequest scaleRequest = new ScaleRequest();
-			Map<String, Integer> replicas = new HashMap<String, Integer>();
-			replicas.put(request.getProgramName(), 0);
-			scaleRequest.setProgramReplica(replicas);
-			
-			scaleApp(app, release, scaleRequest);
-		}
-		
-		/* Stop a specified container. */
-		if (request.isStopContainer()) {
-			/* TODO: wait for layer0 API. */
-		}
-		
-		return false;
 	}
 
 	public boolean rollback(App app, int version) {
@@ -406,7 +310,7 @@ public class AppServiceImpl implements AppService {
 		if (artifact == null) {
 			throw new ObjectNotFoundException();
 		}
-		request.setDockerImage(artifact.getUri());
+		request.setImageURI(artifact.getUri());
 		
 		deployApp(app, request);
 		

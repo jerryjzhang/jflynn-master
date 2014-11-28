@@ -77,7 +77,7 @@ public class AppController {
 	}
 	
 	/* Stop an application. */
-	@RequestMapping(value="/stop/{appName}")
+	@RequestMapping(value="/stop/{appName}", method=RequestMethod.POST, consumes="application/json")
 	public void stopApp(@PathVariable("appName") String appName,
 			            @RequestBody StopAppRequest request) {
 		App app = appService.getAppByName(appName);
