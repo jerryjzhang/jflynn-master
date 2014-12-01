@@ -3,8 +3,8 @@ package com.tencent.jflynn.controller;
 import static org.junit.Assert.*;
 
 import java.util.HashMap;
-import java.util.Map;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,8 +17,9 @@ import org.springframework.web.client.RestTemplate;
 
 import com.tencent.jflynn.boot.JFlynnMain;
 import com.tencent.jflynn.domain.App;
+import com.tencent.jflynn.domain.Program;
 import com.tencent.jflynn.domain.Release;
-import com.tencent.jflynn.dto.DeployRequest;
+import com.tencent.jflynn.dto.ReleaseRequest;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = JFlynnMain.class)
@@ -40,6 +41,11 @@ public class AppIntegrationTest {
 				null, String.class).getBody();
 	}
 	
+	@After
+	public void tearsDown(){
+		restTemplate.delete(baseURL+"/apps/delete/" + appName);
+	}
+	
 	@Test
 	public void testCreateApp(){
 		//create app
@@ -56,7 +62,7 @@ public class AppIntegrationTest {
 	@Test
 	public void testDeployAppWithSVN(){
 		//deploy app
-		DeployRequest req = new DeployRequest();
+		ReleaseRequest req = new ReleaseRequest();
 		req.setSvnURL("http://svn.com");
 		req.setComment("deploy new code");
 		restTemplate.postForEntity(baseURL+"/apps/deploy/"+appName, req, Void.class);
@@ -78,7 +84,7 @@ public class AppIntegrationTest {
 	@Test
 	public void testDeployAppWithImage(){
 		//deploy app
-		DeployRequest req = new DeployRequest();
+		ReleaseRequest req = new ReleaseRequest();
 		req.setImageURI("tegdsf/routercenter");
 		req.setComment("deploy new code");
 		restTemplate.postForEntity(baseURL+"/apps/deploy/"+appName, req, Void.class);
@@ -100,7 +106,7 @@ public class AppIntegrationTest {
 	@Test
 	public void testDeployAppWithRelEnv(){
 		//deploy app
-		DeployRequest req = new DeployRequest();
+		ReleaseRequest req = new ReleaseRequest();
 		req.setImageURI("tegdsf/routercenter");
 		req.setAppEnv(new HashMap<String,String>());
 		req.getAppEnv().put("URL", "http://dsf");
@@ -123,10 +129,13 @@ public class AppIntegrationTest {
 	@Test
 	public void testDeployAppWithProcCmd(){
 		//deploy app
-		DeployRequest req = new DeployRequest();
+		ReleaseRequest req = new ReleaseRequest();
 		req.setImageURI("tegdsf/routercenter");
-		req.setProgramCmd(new HashMap<String,String>());
-		req.getProgramCmd().put("web", "new cmd");
+		Program program = new Program();
+		program.setName("web");
+		program.setCmd("new cmd");
+		req.setPrograms(new Program[1]);
+		req.getPrograms()[0] = program;
 		restTemplate.postForEntity(baseURL+"/apps/deploy/"+appName, req, Void.class);
 		
 		//get app releases and check
@@ -139,17 +148,19 @@ public class AppIntegrationTest {
 		assertNotNull(release.getId());
 		assertEquals(1, release.getVersion());
 		assertTrue(release.getPrograms().size() >= 1);
-		assertEquals(req.getProgramCmd().get("web"),
-				release.getPrograms().get("web").getCmd());
+		assertEquals(program.getCmd(), release.getPrograms().get("web").getCmd());
 	}
 	
 	@Test
 	public void testDeployAppWithProcEpt(){
 		//deploy app
-		DeployRequest req = new DeployRequest();
+		ReleaseRequest req = new ReleaseRequest();
 		req.setImageURI("tegdsf/routercenter");
-		req.setProgramEpt(new HashMap<String,String>());
-		req.getProgramEpt().put("web", "new entrypoint");
+		Program program = new Program();
+		program.setName("web");
+		program.setEntrypoint("new entrypoint");
+		req.setPrograms(new Program[1]);
+		req.getPrograms()[0] = program;
 		
 		restTemplate.postForEntity(baseURL+"/apps/deploy/"+appName, req, Void.class);
 		//get app releases and check
@@ -162,18 +173,20 @@ public class AppIntegrationTest {
 		assertNotNull(release.getId());
 		assertEquals(1, release.getVersion());
 		assertTrue(release.getPrograms().size() >= 1);
-		assertEquals(req.getProgramEpt().get("web"),
+		assertEquals(program.getEntrypoint(),
 				release.getPrograms().get("web").getEntrypoint());
 	}
 	
 	@Test
 	public void testDeployAppWithProcEnv(){
 		//deploy app
-		DeployRequest req = new DeployRequest();
+		ReleaseRequest req = new ReleaseRequest();
 		req.setImageURI("tegdsf/routercenter");
-		req.setProgramEnv(new HashMap<String, Map<String,String>>());
-		req.getProgramEnv().put("web", new HashMap<String,String>());
-		req.getProgramEnv().get("web").put("URL", "http://dsf");
+		Program program = new Program();
+		program.setName("web");
+		program.getEnv().put("URL", "http://dsf");
+		req.setPrograms(new Program[1]);
+		req.getPrograms()[0] = program;
 		
 		restTemplate.postForEntity(baseURL+"/apps/deploy/"+appName, req, Void.class);
 		//get app releases and check
@@ -186,7 +199,7 @@ public class AppIntegrationTest {
 		assertNotNull(release.getId());
 		assertEquals(1, release.getVersion());
 		assertTrue(release.getPrograms().size() >= 1);
-		assertEquals(req.getProgramEnv().get("web").get("URL"),
+		assertEquals(program.getEnv().get("URL"),
 				release.getPrograms().get("web").getEnv().get("URL"));
 	}
 	

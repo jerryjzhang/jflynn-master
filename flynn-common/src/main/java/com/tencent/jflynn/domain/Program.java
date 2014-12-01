@@ -4,11 +4,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Program {
+	private String releaseID;
 	private String name;
 	private String cmd;
 	private String entrypoint;
 	private Map<String,String> env = new HashMap<String,String>();
 	
+	
+	public String getReleaseID() {
+		return releaseID;
+	}
+	public void setReleaseID(String releaseID) {
+		this.releaseID = releaseID;
+	}
 	public String getName() {
 		return name;
 	}

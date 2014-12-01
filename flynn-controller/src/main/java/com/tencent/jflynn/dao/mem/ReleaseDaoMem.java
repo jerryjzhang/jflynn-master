@@ -8,13 +8,15 @@ import java.util.Map;
 import org.springframework.stereotype.Repository;
 
 import com.tencent.jflynn.dao.ReleaseDao;
+import com.tencent.jflynn.domain.Program;
 import com.tencent.jflynn.domain.Release;
 
 @Repository
 public class ReleaseDaoMem implements ReleaseDao {
-	private final Map<String, Release> idToRelease = new HashMap<String, Release>();
+	private final Map<String, Release> idToRelease = 
+			new HashMap<String, Release>();
 	private final Map<String, Map<Integer, Release>> appVersionReleases = 
-		new HashMap<String, Map<Integer, Release>>();
+			new HashMap<String, Map<Integer, Release>>();
 	
 	public void insert(Release release){
 		idToRelease.put(release.getId(), release);
@@ -51,5 +53,11 @@ public class ReleaseDaoMem implements ReleaseDao {
 		}
 		
 		return appVersionReleases.get(appId).get(version);
+	}
+	
+	public List<Program> queryPrograms(String releaseId){
+		Release release = idToRelease.get(releaseId);
+		
+		return new ArrayList<Program>(release.getPrograms().values());
 	}
 }

@@ -26,4 +26,9 @@ public class AppDaoMem implements AppDao {
 		nameToApp.put(app.getName(), app);
 		idToApp.put(app.getId(), app);
 	}
+	
+	public void delete(App app){
+		nameToApp.remove(app.getName());
+		idToApp.remove(app.getId());
+	}
 }

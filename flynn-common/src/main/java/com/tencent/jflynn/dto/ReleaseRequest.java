@@ -2,13 +2,13 @@ package com.tencent.jflynn.dto;
 
 import java.util.Map;
 
-public class DeployRequest {
+import com.tencent.jflynn.domain.Program;
+
+public class ReleaseRequest {
 	private String svnURL;
 	private String imageURI;
 	private Map<String,String> appEnv;
-	private Map<String,String> programCmd;
-	private Map<String,String> programEpt;
-	private Map<String,Map<String,String>> programEnv;
+	private Program[] programs;
 	
 	private String comment;
 	
@@ -36,22 +36,10 @@ public class DeployRequest {
 	public void setAppEnv(Map<String, String> releaseEnv) {
 		this.appEnv = releaseEnv;
 	}
-	public Map<String, String> getProgramCmd() {
-		return programCmd;
+	public Program[] getPrograms() {
+		return programs;
 	}
-	public void setProgramCmd(Map<String, String> processCmd) {
-		this.programCmd = processCmd;
-	}
-	public Map<String, String> getProgramEpt() {
-		return programEpt;
-	}
-	public void setProgramEpt(Map<String, String> processEpt) {
-		this.programEpt = processEpt;
-	}
-	public Map<String, Map<String, String>> getProgramEnv() {
-		return programEnv;
-	}
-	public void setProgramEnv(Map<String, Map<String, String>> processEnv) {
-		this.programEnv = processEnv;
+	public void setPrograms(Program[] programs) {
+		this.programs = programs;
 	}
 }

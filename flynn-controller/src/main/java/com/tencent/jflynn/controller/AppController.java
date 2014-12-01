@@ -11,9 +11,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tencent.jflynn.domain.App;
 import com.tencent.jflynn.domain.Release;
-import com.tencent.jflynn.dto.DeployRequest;
+import com.tencent.jflynn.dto.ReleaseRequest;
 import com.tencent.jflynn.dto.ScaleRequest;
 import com.tencent.jflynn.dto.StopAppRequest;
+import com.tencent.jflynn.exception.ObjectAlreadyExistException;
 import com.tencent.jflynn.exception.ObjectNotFoundException;
 import com.tencent.jflynn.service.AppService;
 import com.tencent.jflynn.service.ReleaseService;
@@ -39,7 +40,12 @@ public class AppController {
 	
 	@RequestMapping(value="/create/{appName}", method=RequestMethod.POST, produces="application/json")
 	public String create(@PathVariable("appName") String appName){
-		App app = new App();
+		App app = appService.getAppByName(appName);
+		if(app != null){
+			throw new ObjectAlreadyExistException();
+		}
+		
+		app = new App();
 		app.setId(IdGenerator.generate());
 		app.setName(appName);
 		app.setCreateTime(new Timestamp(System.currentTimeMillis()));
@@ -50,9 +56,19 @@ public class AppController {
 		return app.getId();
 	}
 	
+	@RequestMapping(value="/delete/{appName}", method=RequestMethod.DELETE, produces="application/json")
+	public void delete(@PathVariable("appName") String appName){
+		App app = appService.getAppByName(appName);
+    	if(app == null){
+    		throw new ObjectNotFoundException();
+    	}
+		
+		appService.deleteApp(app);
+	}
+	
 	@RequestMapping(value="/deploy/{appName}", method=RequestMethod.POST, consumes="application/json")
 	public String deploy(@PathVariable("appName") String appName,
-			@RequestBody DeployRequest req){
+			@RequestBody ReleaseRequest req){
 		App app = appService.getAppByName(appName);
     	if(app == null){
     		throw new ObjectNotFoundException();

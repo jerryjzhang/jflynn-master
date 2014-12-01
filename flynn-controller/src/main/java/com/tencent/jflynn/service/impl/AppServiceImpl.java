@@ -1,11 +1,8 @@
 package com.tencent.jflynn.service.impl;
 
-import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,16 +18,15 @@ import com.tencent.jflynn.domain.Artifact;
 import com.tencent.jflynn.domain.Formation;
 import com.tencent.jflynn.domain.Program;
 import com.tencent.jflynn.domain.Release;
-import com.tencent.jflynn.dto.DeployRequest;
+import com.tencent.jflynn.dto.ReleaseRequest;
 import com.tencent.jflynn.dto.ScaleRequest;
 import com.tencent.jflynn.dto.StopAppRequest;
 import com.tencent.jflynn.dto.scheduler.ExtendedProgram;
 import com.tencent.jflynn.dto.scheduler.ScheduleRequest;
 import com.tencent.jflynn.exception.ObjectNotFoundException;
 import com.tencent.jflynn.service.AppService;
+import com.tencent.jflynn.service.ReleaseService;
 import com.tencent.jflynn.service.SchedulerService;
-import com.tencent.jflynn.utils.IdGenerator;
-import com.tencent.jflynn.utils.ShellCommandExecutor;
 
 @Service
 public class AppServiceImpl implements AppService {
@@ -46,6 +42,8 @@ public class AppServiceImpl implements AppService {
 	private FormationDao formationDao;
 	@Autowired
 	private SchedulerService scheduler;
+	@Autowired
+	private ReleaseService releaseService;
 	
 	@Value("${httpServerUrl}")
 	private String httpServerUrl;
@@ -58,157 +56,28 @@ public class AppServiceImpl implements AppService {
 	@Value("${slugBuildScript:slugBuild.sh}")
 	private String slugBuildScript;
 	
-	private static final Pattern PATTERN_TYPES = Pattern.compile(".*declares types -> (.*)");
-	
 	public void createApp(App app){
 		appDao.insert(app);
+	}
+	
+	public void deleteApp(App app){
+		appDao.delete(app);
 	}
 	
 	public App getAppByName(String appName){
 		return appDao.queryByName(appName);
 	}
 	
-	public Release deployApp(App app, DeployRequest req){
-		Release release = null;
-		if(app.getReleaseID() != null){
-			release = releaseDao.queryById(app.getReleaseID());
-		}
-		if(release == null){
-			release = new Release();
-			release.setAppID(app.getId());
-		}
-		release.setId(IdGenerator.generate());
-		release.setVersion(app.getLatestVersion() + 1);
-		release.setTag(req.getComment());
-		release.setCreateTime(new Timestamp(System.currentTimeMillis()));
+	public Release deployApp(App app, ReleaseRequest req){
+		Release release = releaseService.createRelease(app, req);
 		app.setLatestVersion(release.getVersion());
 		app.setReleaseID(release.getId());
-		
-		//build new artifact if either svnURL or dockerImage is specified
-		if(req.getSvnURL() != null){
-			handleSvnDeploy(app, release, req);
-		}else if(req.getImageURI() != null){
-			handleImageDeploy(app, release, req);
-		}
-		
-		//update release environment variables
-		if(req.getAppEnv() != null){
-			for(Map.Entry<String, String> e : req.getAppEnv().entrySet()){
-				release.getAppEnv().put(e.getKey(), e.getValue());
-			}
-		}
-		
-		//update process cmd 
-		if(req.getProgramCmd() != null){
-			for(Map.Entry<String, String> e : req.getProgramCmd().entrySet()){
-				String procName = e.getKey();
-				Program procType = release.getPrograms().get(procName);
-				if(procType == null){
-					procType = new Program();
-					procType.setName(procName);
-					release.getPrograms().put(procName, procType);
-				}
-				procType.setCmd(e.getValue());
-			}
-		}
-		
-		//update process entrypoint
-		if(req.getProgramEpt() != null){
-			for(Map.Entry<String, String> e : req.getProgramEpt().entrySet()){
-				String procName = e.getKey();
-				Program procType = release.getPrograms().get(procName);
-				if(procType == null){
-					procType = new Program();
-					procType.setName(procName);
-					release.getPrograms().put(procName, procType);
-				}
-				procType.setEntrypoint(e.getValue());
-			}
-		}		
-		
-		//update process environment variables
-		if(req.getProgramEnv() != null){
-			for(Map.Entry<String, Map<String,String>> e : req.getProgramEnv().entrySet()){
-				String procName = e.getKey();
-				Program procType = release.getPrograms().get(procName);
-				if(procType == null){
-					procType = new Program();
-					procType.setName(procName);
-					release.getPrograms().put(procName, procType);
-				}
-				for(Map.Entry<String, String> env : e.getValue().entrySet()){
-					procType.getEnv().put(env.getKey(), env.getValue());
-				}
-			}
-		}		
-		
-		//if no processes in the release, create a "default" one
-		if(release.getPrograms().size() == 0){
-			Program p = new Program();
-			p.setName("default");
-			release.getPrograms().put(p.getName(), p);
-		}
-		
-		releaseDao.insert(release);
-		LOG.info("Created release for appName=" + app.getName() + " release=" + release);
 		appDao.update(app);
 		LOG.info("Updated appName=" + app.getName() + " set current releaseId=" + app.getReleaseID());
 		
 		return release;
 	}
-	
-	private void handleImageDeploy(App app, Release release, DeployRequest req){
-		//create artifact and release object
-		Artifact artifact = new Artifact();
-		artifact.setId(IdGenerator.generate());
-		artifact.setUri(req.getImageURI());
-		artifact.setCreateTime(new Timestamp(System.currentTimeMillis()));
-		artifactDao.insert(artifact);
-		LOG.info("Created artifact for appName=" + app.getName() + " artifact=" + artifact);
-		
-		release.setArtifactID(artifact.getId());
-	}
-	
-	private void handleSvnDeploy(App app, Release release, DeployRequest req){
-		String fileName = app.getName() + "-" + System.currentTimeMillis();
-		Map<String,String> env = new HashMap<String,String>();
-		env.put("SVN_URL", req.getSvnURL());
-		env.put("APP_NAME", fileName);
-		env.put("IMAGE_SVN", svnImage);
-		env.put("HTTP_SERVER_URL", httpServerUrl);
-		env.put("IMAGE_SLUGBUILDER", slugBuilderImage);
-		
-		String cmd = slugBuildScript;
-		String out = ShellCommandExecutor.execute(cmd, env);
-		System.out.println(out);
-		//Grep output and extract process types
-		Matcher m = PATTERN_TYPES.matcher(out);
-		String [] processTypes = null;
-		if(m.find()){
-			processTypes = m.group(1).split(", ");
-		}
-		
-		//create artifact and release object
-		Artifact artifact = new Artifact();
-		artifact.setId(IdGenerator.generate());
-		artifact.setUri(slugRunnerImage);
-		artifact.setCreateTime(new Timestamp(System.currentTimeMillis()));
-		artifactDao.insert(artifact);
-		LOG.info("Created artifact for appName=" + app.getName() + " artifact=" + artifact);
-		
-		release.setArtifactID(artifact.getId());
-		release.getAppEnv().put("SLUG_URL", httpServerUrl + "/slugs/" + fileName + ".tgz");
-		if(processTypes != null){
-			for(String type : processTypes){
-				type = type.trim();
-				Program ptype = new Program();
-				ptype.setName(type);
-				ptype.setCmd("start " + type);
-				release.getPrograms().put(type, ptype);
-			}
-		}
-	}
-	
+
 	public void scaleApp(App app, Release release, ScaleRequest req){
 		ScheduleRequest sreq = new ScheduleRequest();
 		Artifact artifact = artifactDao.queryById(release.getArtifactID());
@@ -217,6 +86,9 @@ public class AppServiceImpl implements AppService {
 		sreq.setImageUri(artifact.getUri());
 		for(Map.Entry<String,Integer> e : req.getProgramReplica().entrySet()){
 			String programName = e.getKey();
+			if(release.getPrograms().get(programName) == null){
+				continue;
+			}
 			ExtendedProgram ep = new ExtendedProgram();
 			ep.setReplica(e.getValue());
 			ep.setProgram(release.getPrograms().get(programName));
@@ -268,7 +140,7 @@ public class AppServiceImpl implements AppService {
 		}
 		
 		/* Composite the deploy request for this release. */
-		DeployRequest request = new DeployRequest();
+		ReleaseRequest request = new ReleaseRequest();
 		request.setComment(release.getTag() + ", rollback to version " + version);
 		request.setAppEnv(release.getAppEnv());
 		
@@ -293,17 +165,17 @@ public class AppServiceImpl implements AppService {
 				}
 			}
 			
-			if (programEpt.size() > 0) {
-				request.setProgramEpt(programEpt);
-			}
-			
-			if (programEnv.size() > 0) {
-				request.setProgramEnv(programEnv);
-			}
-			
-			if (programCmd.size() > 0) {
-				request.setProgramCmd(programCmd);
-			}
+//			if (programEpt.size() > 0) {
+//				request.setProgramEpt(programEpt);
+//			}
+//			
+//			if (programEnv.size() > 0) {
+//				request.setProgramEnv(programEnv);
+//			}
+//			
+//			if (programCmd.size() > 0) {
+//				request.setProgramCmd(programCmd);
+//			}
 		}
 		
 		Artifact artifact = artifactDao.queryById(release.getArtifactID());
