@@ -35,7 +35,7 @@ public class AppIntegrationTest {
 	}
 	
 	@Before
-	public void init(){
+	public void setUp(){
 		//create app
 		restTemplate.postForEntity(baseURL+"/apps/create/" + appName, 
 				null, String.class).getBody();

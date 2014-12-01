@@ -26,11 +26,11 @@ public class ProgramController {
 	@Autowired
 	private ReleaseService releaseService;
 	
-	@RequestMapping(value="/save/{appName}", method=RequestMethod.POST, consumes="application/json")
+	@RequestMapping(value="/save/app/{appName}", method=RequestMethod.POST, consumes="application/json")
 	public String save(@PathVariable("appName") String appName,
 			@RequestBody Program program){
 		App app = appService.getAppByName(appName);
-    	if(app == null){
+    	if(app == null || app.getReleaseID() == null){
     		throw new ObjectNotFoundException();
     	}
     	ReleaseRequest req = new ReleaseRequest();
@@ -41,7 +41,21 @@ public class ProgramController {
     	return release.getId();
 	}
 	
-	@RequestMapping(value="/list/{appName}", method=RequestMethod.POST, produces="application/json")
+	@RequestMapping(value="/delete/app/{appName}/program/{programName}", method=RequestMethod.DELETE)
+	public String delete(@PathVariable("appName") String appName, @PathVariable("programName") String programName){
+		App app = appService.getAppByName(appName);
+    	if(app == null || app.getReleaseID() == null){
+    		throw new ObjectNotFoundException();
+    	}
+    	ReleaseRequest req = new ReleaseRequest();
+    	req.setDeletePrograms(new String[1]);
+    	req.getDeletePrograms()[0] = programName;
+    	
+    	Release release = appService.deployApp(app, req);
+    	return release.getId();
+	}
+	
+	@RequestMapping(value="/list/app/{appName}", method=RequestMethod.GET, produces="application/json")
 	public Program[] list(@PathVariable("appName") String appName){
 		App app = appService.getAppByName(appName);
     	if(app == null || app.getReleaseID() == null){
@@ -51,10 +65,5 @@ public class ProgramController {
 		List<Program> programs = releaseService.getPrograms(app.getReleaseID());
 		
 		return programs.toArray(new Program[programs.size()]);
-	}
-	
-	@RequestMapping(value="/delete/{appName}", method=RequestMethod.DELETE)
-	public void delete(@PathVariable("appName") String appName, @PathVariable("programName") String programName){
-		
 	}
 }

@@ -72,8 +72,6 @@ public class ReleaseServiceImpl implements ReleaseService {
 		release.setVersion(app.getLatestVersion() + 1);
 		release.setTag(req.getComment());
 		release.setCreateTime(new Timestamp(System.currentTimeMillis()));
-		app.setLatestVersion(release.getVersion());
-		app.setReleaseID(release.getId());
 		
 		//build new artifact if either svnURL or dockerImage is specified
 		if(req.getSvnURL() != null){
@@ -92,6 +90,12 @@ public class ReleaseServiceImpl implements ReleaseService {
 		if(req.getPrograms() != null){
 			for(Program program : req.getPrograms()){
 				release.getPrograms().put(program.getName(), program);
+			}
+		}
+		
+		if(req.getDeletePrograms() != null){
+			for(String programName : req.getDeletePrograms()){
+				release.getPrograms().remove(programName);
 			}
 		}
 		

@@ -104,18 +104,6 @@ public class AppController {
 		appService.stopApp(app, request);				
 	}
 	
-	/* Rollback the current application to an old version. */
-	@RequestMapping(value="/rollback/{appName}/{version}")
-	public boolean rollback(@PathVariable("appName") String appName,
-			                @PathVariable("version") int version) {
-		App app = appService.getAppByName(appName);
-		if (app == null) {
-			throw new ObjectNotFoundException();
-		}
-		
-		return appService.rollback(app, version);
-	}
-	
 //	@ResponseStatus(value=HttpStatus.INTERNAL_SERVER_ERROR, reason="internal server error")  // 409
 //	@ExceptionHandler(Exception.class)
 //	public void handleException(){

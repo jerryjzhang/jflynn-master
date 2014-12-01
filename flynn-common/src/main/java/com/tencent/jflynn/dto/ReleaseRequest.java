@@ -9,7 +9,7 @@ public class ReleaseRequest {
 	private String imageURI;
 	private Map<String,String> appEnv;
 	private Program[] programs;
-	
+	private String[]  deletePrograms;
 	private String comment;
 	
 	public String getSvnURL() {
@@ -41,5 +41,11 @@ public class ReleaseRequest {
 	}
 	public void setPrograms(Program[] programs) {
 		this.programs = programs;
+	}
+	public String[] getDeletePrograms() {
+		return deletePrograms;
+	}
+	public void setDeletePrograms(String[] deletePrograms) {
+		this.deletePrograms = deletePrograms;
 	}
 }

@@ -20,12 +20,23 @@ public class ReleaseController {
 	private AppService appService;
 	
 	@RequestMapping(value="/get/app/{appName}", method=RequestMethod.GET)
-	public Release[] getByAppName(@PathVariable("appName") String appName){
+	public Release[] list(@PathVariable("appName") String appName){
 		App app = appService.getAppByName(appName);
     	if(app == null){
     		throw new ObjectNotFoundException();
     	}
     	List<Release> releases = appService.getAppReleases(app);
     	return releases.toArray(new Release[releases.size()]);
+	}
+	
+	@RequestMapping(value="/rollback/app/{appName}/version/{releaseVersion}")
+	public boolean rollback(@PathVariable("appName") String appName,
+			                @PathVariable("releaseVersion") int releaseVersion) {
+		App app = appService.getAppByName(appName);
+		if (app == null) {
+			throw new ObjectNotFoundException();
+		}
+		
+		return appService.rollback(app, releaseVersion);
 	}
 }
