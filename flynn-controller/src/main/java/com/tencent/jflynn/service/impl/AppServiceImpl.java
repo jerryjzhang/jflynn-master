@@ -108,10 +108,12 @@ public class AppServiceImpl implements AppService {
 	}
 
 	public void stopApp(App app, StopAppRequest req) {
-		if(req != null && req.getProgramName() != null){
-			scheduler.stopProgram(req.getProgramName());
-		}else{
+		if (req == null) {
 			scheduler.stopApp(app.getName());
+		} else if (req.isStopProgram()) {
+			scheduler.stopProgram(req.getProgramName());
+		} else if (req.isStopContainer()) {
+			scheduler.stopAppContainer(req.getProgramName(), req.getContainerId());
 		}
 	}
 

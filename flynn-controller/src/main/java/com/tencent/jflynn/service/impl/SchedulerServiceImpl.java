@@ -83,4 +83,9 @@ public class SchedulerServiceImpl implements SchedulerService {
 			}
 		}
 	}
+
+	public void stopAppContainer(String programName, String containerId) {
+		// TODO Auto-generated method stub
+		
+	}
 }

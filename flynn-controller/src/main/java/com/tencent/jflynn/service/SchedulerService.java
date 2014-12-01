@@ -6,4 +6,5 @@ public interface SchedulerService {
 	public void schedule(ScheduleRequest req);
 	public void stopApp(String appName);
 	public void stopProgram(String programName);
+	public void stopAppContainer(String programName, String containerId);
 }
