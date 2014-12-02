@@ -14,6 +14,17 @@ public class Release {
 	private Map<String,String> appEnv = new HashMap<String,String>();
 	private Map<String,Program> programs = new HashMap<String,Program>();
 	
+	public Release(){
+	}
+	
+	public Release(Release r){
+		this.id = r.id;
+		this.artifactID = r.artifactID;
+		this.appID = r.appID;
+		this.version = r.version;
+		this.appEnv.putAll(r.appEnv);
+	}
+	
 	public String getId() {
 		return id;
 	}

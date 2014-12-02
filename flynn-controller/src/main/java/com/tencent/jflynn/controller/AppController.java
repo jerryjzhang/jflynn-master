@@ -78,7 +78,7 @@ public class AppController {
     	return release.getId();
 	}
 	
-	@RequestMapping(value="/scale/{appName}", method=RequestMethod.POST, consumes="application/json")
+	@RequestMapping(value="/scale/{appName}", method=RequestMethod.PUT, consumes="application/json")
 	public void scale(@PathVariable("appName") String appName,
 			@RequestBody ScaleRequest req){
 		App app = appService.getAppByName(appName);
@@ -93,7 +93,7 @@ public class AppController {
 	}
 	
 	/* Stop an application. */
-	@RequestMapping(value="/stop/{appName}", method=RequestMethod.POST, consumes="application/json")
+	@RequestMapping(value="/stop/{appName}", method=RequestMethod.PUT, consumes="application/json")
 	public void stopApp(@PathVariable("appName") String appName,
 			            @RequestBody StopAppRequest request) {
 		App app = appService.getAppByName(appName);

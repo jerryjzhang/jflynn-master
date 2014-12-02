@@ -15,30 +15,20 @@ import com.tencent.jflynn.domain.Release;
 public class ReleaseDaoMem implements ReleaseDao {
 	private final Map<String, Release> idToRelease = 
 			new HashMap<String, Release>();
-	private final Map<String, Map<Integer, Release>> appVersionReleases = 
-			new HashMap<String, Map<Integer, Release>>();
 	
 	public void insert(Release release){
 		idToRelease.put(release.getId(), release);
-		
-		Map<Integer, Release> versionReleases = appVersionReleases.get(release.getAppID());
-		if (versionReleases == null) {
-			versionReleases = new HashMap<Integer, Release>();
-			appVersionReleases.put(release.getAppID(), versionReleases);
-		}
-		
-		versionReleases.put(release.getVersion(), release);		
 	}
 	
 	public Release queryById(String id){
 		return idToRelease.get(id);
 	}
 	
-	public List<Release> queryByAppId(String appID){
+	public List<Release> queryByAppId(String appId){
 		List<Release> releases = new ArrayList<Release>();
 		
 		for(Release release : idToRelease.values()){
-			if(release.getAppID().equals(appID)){
+			if(release.getAppID().equals(appId)){
 				releases.add(release);
 			}
 		}
@@ -46,13 +36,18 @@ public class ReleaseDaoMem implements ReleaseDao {
 		return releases;
 	}
 	
-	/* Return release by a version of an application. */
 	public Release queryByAppIdAndVersion(String appId, int version) {
-		if (!appVersionReleases.containsKey(appId)) {
-			return null;
+		Release release = null;
+		
+		for(Release r : idToRelease.values()){
+			if(r.getAppID().equals(appId)
+					|| r.getVersion() == version){
+				release = r;
+				break;
+			}
 		}
 		
-		return appVersionReleases.get(appId).get(version);
+		return release;
 	}
 	
 	public List<Program> queryPrograms(String releaseId){

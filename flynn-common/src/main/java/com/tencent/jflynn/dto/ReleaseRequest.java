@@ -10,6 +10,7 @@ public class ReleaseRequest {
 	private Map<String,String> appEnv;
 	private Program[] programs;
 	private String[]  deletePrograms;
+	private Integer baseVersion;
 	private String comment;
 	
 	public String getSvnURL() {
@@ -47,5 +48,11 @@ public class ReleaseRequest {
 	}
 	public void setDeletePrograms(String[] deletePrograms) {
 		this.deletePrograms = deletePrograms;
+	}
+	public Integer getBaseVersion() {
+		return baseVersion;
+	}
+	public void setBaseVersion(Integer baseVersion) {
+		this.baseVersion = baseVersion;
 	}
 }

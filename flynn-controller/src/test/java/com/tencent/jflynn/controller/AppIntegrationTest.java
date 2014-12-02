@@ -68,7 +68,7 @@ public class AppIntegrationTest {
 		restTemplate.postForEntity(baseURL+"/apps/deploy/"+appName, req, Void.class);
 		
 		//get app releases and check
-		Release[] releases = restTemplate.getForEntity(baseURL+"/releases/get/app/"+appName, Release[].class).getBody();
+		Release[] releases = restTemplate.getForEntity(baseURL+"/releases/list/app/"+appName, Release[].class).getBody();
 		assertNotNull(releases);
 		assertEquals(1, releases.length);
 		Release release = releases[0];
@@ -90,7 +90,7 @@ public class AppIntegrationTest {
 		restTemplate.postForEntity(baseURL+"/apps/deploy/"+appName, req, Void.class);
 		
 		//get app releases and check
-		Release[] releases = restTemplate.getForEntity(baseURL+"/releases/get/app/"+appName, Release[].class).getBody();
+		Release[] releases = restTemplate.getForEntity(baseURL+"/releases/list/app/"+appName, Release[].class).getBody();
 		assertNotNull(releases);
 		assertEquals(1, releases.length);
 		Release release = releases[0];
@@ -113,7 +113,7 @@ public class AppIntegrationTest {
 		restTemplate.postForEntity(baseURL+"/apps/deploy/"+appName, req, Void.class);
 		
 		//get app releases and check
-		Release[] releases = restTemplate.getForEntity(baseURL+"/releases/get/app/"+appName, Release[].class).getBody();
+		Release[] releases = restTemplate.getForEntity(baseURL+"/releases/list/app/"+appName, Release[].class).getBody();
 		assertNotNull(releases);
 		assertEquals(1, releases.length);
 		Release release = releases[0];
@@ -139,7 +139,7 @@ public class AppIntegrationTest {
 		restTemplate.postForEntity(baseURL+"/apps/deploy/"+appName, req, Void.class);
 		
 		//get app releases and check
-		Release[] releases = restTemplate.getForEntity(baseURL+"/releases/get/app/"+appName, Release[].class).getBody();
+		Release[] releases = restTemplate.getForEntity(baseURL+"/releases/list/app/"+appName, Release[].class).getBody();
 		assertNotNull(releases);
 		assertEquals(1, releases.length);
 		Release release = releases[0];
@@ -164,7 +164,7 @@ public class AppIntegrationTest {
 		
 		restTemplate.postForEntity(baseURL+"/apps/deploy/"+appName, req, Void.class);
 		//get app releases and check
-		Release[] releases = restTemplate.getForEntity(baseURL+"/releases/get/app/"+appName, Release[].class).getBody();
+		Release[] releases = restTemplate.getForEntity(baseURL+"/releases/list/app/"+appName, Release[].class).getBody();
 		assertNotNull(releases);
 		assertEquals(1, releases.length);
 		Release release = releases[0];
@@ -190,7 +190,7 @@ public class AppIntegrationTest {
 		
 		restTemplate.postForEntity(baseURL+"/apps/deploy/"+appName, req, Void.class);
 		//get app releases and check
-		Release[] releases = restTemplate.getForEntity(baseURL+"/releases/get/app/"+appName, Release[].class).getBody();
+		Release[] releases = restTemplate.getForEntity(baseURL+"/releases/list/app/"+appName, Release[].class).getBody();
 		assertNotNull(releases);
 		assertEquals(1, releases.length);
 		Release release = releases[0];

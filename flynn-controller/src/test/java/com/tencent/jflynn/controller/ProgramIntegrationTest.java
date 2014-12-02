@@ -48,7 +48,7 @@ public class ProgramIntegrationTest {
 	}
 	
 	@Test
-	public void testSaveProgram()throws Exception{
+	public void testSaveProgram(){
 		Program program = new Program();
 		program.setName("web");
 		program.setCmd("start web");

@@ -9,6 +9,7 @@ import com.tencent.jflynn.dto.ReleaseRequest;
 
 public interface ReleaseService {
 	public Release getReleaseById(String releaseId);
+	public List<Release> getReleasesByAppId(String appId);
 	public List<Program> getPrograms(String releaseId);
 	public Release createRelease(App app, ReleaseRequest req);
 }

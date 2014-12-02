@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.rits.cloning.Cloner;
 import com.tencent.jflynn.dao.ArtifactDao;
 import com.tencent.jflynn.dao.FormationDao;
 import com.tencent.jflynn.dao.ReleaseDao;
@@ -50,9 +51,14 @@ public class ReleaseServiceImpl implements ReleaseService {
 	private String slugBuildScript;
 	
 	private static final Pattern PATTERN_TYPES = Pattern.compile(".*declares types -> (.*)");
+	private static final Cloner cloner = new Cloner();
 	
 	public Release getReleaseById(String releaseId){
 		return releaseDao.queryById(releaseId);
+	}
+	
+	public List<Release> getReleasesByAppId(String appId){
+		return releaseDao.queryByAppId(appId);
 	}
 	
 	public List<Program> getPrograms(String releaseId){
@@ -60,14 +66,23 @@ public class ReleaseServiceImpl implements ReleaseService {
 	}
 	
 	public Release createRelease(App app, ReleaseRequest req){
-		Release release = null;
-		if(app.getReleaseID() != null){
-			release = releaseDao.queryById(app.getReleaseID());
+		Release baseRelease = null;
+		//based on the specified version or the current release of the app
+		if(req.getBaseVersion() != null){
+			baseRelease = releaseDao.queryByAppIdAndVersion(app.getId(), req.getBaseVersion());
+			req.setComment("Rollback to version " + req.getBaseVersion());
+		}else if(app.getReleaseID() != null){
+			baseRelease = releaseDao.queryById(app.getReleaseID());
 		}
-		if(release == null){
+		
+		Release release = null;
+		if(baseRelease == null){
 			release = new Release();
 			release.setAppID(app.getId());
+		}else{
+			release = cloner.deepClone(baseRelease);
 		}
+		
 		release.setId(IdGenerator.generate());
 		release.setVersion(app.getLatestVersion() + 1);
 		release.setTag(req.getComment());
