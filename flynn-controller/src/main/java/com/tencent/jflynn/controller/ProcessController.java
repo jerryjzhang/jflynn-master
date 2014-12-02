@@ -23,9 +23,10 @@ public class ProcessController {
 	@Autowired
 	private ProcessService processService;
 	
-	@RequestMapping(value="/list/{appName}", method=RequestMethod.GET, produces="application/json")
+	@RequestMapping(value="/list/{appName}", method=RequestMethod.POST)
 	public Process[] list(@PathVariable("appName") String appName,
 			@RequestBody ProcessRequest req){
+		System.out.println("list processes for " + appName);
 		App app = appService.getAppByName(appName);
     	if(app == null){
     		throw new ObjectNotFoundException();

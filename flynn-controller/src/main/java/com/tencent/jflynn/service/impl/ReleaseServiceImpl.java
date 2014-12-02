@@ -89,9 +89,9 @@ public class ReleaseServiceImpl implements ReleaseService {
 		release.setCreateTime(new Timestamp(System.currentTimeMillis()));
 		
 		//build new artifact if either svnURL or dockerImage is specified
-		if(req.getSvnURL() != null){
+		if(req.getSvnURL() != null && !"".equals(req.getSvnURL())){
 			handleSvnDeploy(app, release, req);
-		}else if(req.getImageURI() != null){
+		}else if(req.getImageURI() != null && !"".equals(req.getImageURI())){
 			handleImageDeploy(app, release, req);
 		}
 		

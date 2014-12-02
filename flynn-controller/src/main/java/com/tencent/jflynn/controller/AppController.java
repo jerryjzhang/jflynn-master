@@ -39,7 +39,7 @@ public class AppController {
     	return app;
     }
 	
-	@RequestMapping(value="/create/{appName}", method=RequestMethod.POST, consumes="application/json")
+	@RequestMapping(value="/create/{appName}", method=RequestMethod.POST)
 	public String create(@PathVariable("appName") String appName){
 		App app = appService.getAppByName(appName);
 		if(app != null){

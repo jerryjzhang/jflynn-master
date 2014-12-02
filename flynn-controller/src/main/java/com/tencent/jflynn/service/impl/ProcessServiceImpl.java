@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
 import com.tencent.jflynn.dao.ArtifactDao;
@@ -28,14 +29,14 @@ public class ProcessServiceImpl implements ProcessService {
 	@Autowired
 	private ArtifactDao artifactDao;
 	
-	private RestTemplate restTemplate = new RestTemplate();
+	protected RestOperations restClient = new RestTemplate();
 	
 	public void schedule(String appName, ScheduleRequest req){
-		if("standalone".equals(workMode)){
-			scheduleLocal(req);
-			return;
-		}
-		boolean success = restTemplate.postForEntity(schedulerUrl+"/apps/scale", req, Boolean.class).getBody();
+//		if("standalone".equals(workMode)){
+//			scheduleLocal(req);
+//			return;
+//		}
+		boolean success = restClient.postForEntity(schedulerUrl+"/apps/scale", req, Boolean.class).getBody();
 		LOG.info("Response from scheduler for ACTION schedule: " + success);
 	}
 	
@@ -50,18 +51,18 @@ public class ProcessServiceImpl implements ProcessService {
 	}
 	
 	public Process[] list(String appName, ProcessRequest req){
-		Process[] processes = restTemplate.getForEntity(schedulerUrl+"/apps/containers/"+appName, Process[].class).getBody();
+		Process[] processes = restClient.getForEntity(schedulerUrl+"/apps/process/"+appName, Process[].class).getBody();
 		LOG.info("Response from scheduler for ACTION list: " + processes);
 		return processes;
 	}
 	
 	public void stopByApp(String appName){
-		boolean success = restTemplate.postForEntity(schedulerUrl+"/apps/kill/"+appName, null, Boolean.class).getBody();
+		boolean success = restClient.postForEntity(schedulerUrl+"/apps/kill/"+appName, null, Boolean.class).getBody();
 		LOG.info("Response from scheduler for ACTION stopApp: " + success);
 	}
 	
 	public void stopByProgram(String appName, String programName){
-		boolean success = restTemplate.postForEntity(schedulerUrl+"/programs/kill/"+appName+"/"+programName, null, Boolean.class).getBody();
+		boolean success = restClient.postForEntity(schedulerUrl+"/programs/kill/"+appName+"/"+programName, null, Boolean.class).getBody();
 		LOG.info("Response from scheduler for ACTION stopProgram: " + success);
 	}
 	
