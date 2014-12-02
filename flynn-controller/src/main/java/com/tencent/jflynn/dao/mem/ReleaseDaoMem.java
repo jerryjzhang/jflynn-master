@@ -41,7 +41,7 @@ public class ReleaseDaoMem implements ReleaseDao {
 		
 		for(Release r : idToRelease.values()){
 			if(r.getAppID().equals(appId)
-					|| r.getVersion() == version){
+					&& r.getVersion() == version){
 				release = r;
 				break;
 			}
