@@ -34,8 +34,8 @@ public class ProgramController {
     		throw new ObjectNotFoundException();
     	}
     	ReleaseRequest req = new ReleaseRequest();
-    	req.setPrograms(new Program[1]);
-    	req.getPrograms()[0] = program;
+    	req.setSavePrograms(new Program[1]);
+    	req.getSavePrograms()[0] = program;
     	Release release = appService.deployApp(app, req);
     	
     	return release.getId();

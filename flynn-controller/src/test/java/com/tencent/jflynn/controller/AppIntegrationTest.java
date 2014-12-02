@@ -134,8 +134,8 @@ public class AppIntegrationTest {
 		Program program = new Program();
 		program.setName("web");
 		program.setCmd("new cmd");
-		req.setPrograms(new Program[1]);
-		req.getPrograms()[0] = program;
+		req.setSavePrograms(new Program[1]);
+		req.getSavePrograms()[0] = program;
 		restTemplate.postForEntity(baseURL+"/apps/deploy/"+appName, req, Void.class);
 		
 		//get app releases and check
@@ -159,8 +159,8 @@ public class AppIntegrationTest {
 		Program program = new Program();
 		program.setName("web");
 		program.setEntrypoint("new entrypoint");
-		req.setPrograms(new Program[1]);
-		req.getPrograms()[0] = program;
+		req.setSavePrograms(new Program[1]);
+		req.getSavePrograms()[0] = program;
 		
 		restTemplate.postForEntity(baseURL+"/apps/deploy/"+appName, req, Void.class);
 		//get app releases and check
@@ -185,8 +185,8 @@ public class AppIntegrationTest {
 		Program program = new Program();
 		program.setName("web");
 		program.getEnv().put("URL", "http://dsf");
-		req.setPrograms(new Program[1]);
-		req.getPrograms()[0] = program;
+		req.setSavePrograms(new Program[1]);
+		req.getSavePrograms()[0] = program;
 		
 		restTemplate.postForEntity(baseURL+"/apps/deploy/"+appName, req, Void.class);
 		//get app releases and check

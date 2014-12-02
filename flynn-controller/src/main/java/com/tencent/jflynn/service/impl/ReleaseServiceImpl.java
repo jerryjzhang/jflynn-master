@@ -102,8 +102,8 @@ public class ReleaseServiceImpl implements ReleaseService {
 			}
 		}
 		
-		if(req.getPrograms() != null){
-			for(Program program : req.getPrograms()){
+		if(req.getSavePrograms() != null){
+			for(Program program : req.getSavePrograms()){
 				release.getPrograms().put(program.getName(), program);
 			}
 		}

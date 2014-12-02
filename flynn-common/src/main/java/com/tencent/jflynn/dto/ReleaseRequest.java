@@ -8,7 +8,7 @@ public class ReleaseRequest {
 	private String svnURL;
 	private String imageURI;
 	private Map<String,String> appEnv;
-	private Program[] programs;
+	private Program[] savePrograms;
 	private String[]  deletePrograms;
 	private Integer baseVersion;
 	private String comment;
@@ -37,11 +37,11 @@ public class ReleaseRequest {
 	public void setAppEnv(Map<String, String> releaseEnv) {
 		this.appEnv = releaseEnv;
 	}
-	public Program[] getPrograms() {
-		return programs;
+	public Program[] getSavePrograms() {
+		return savePrograms;
 	}
-	public void setPrograms(Program[] programs) {
-		this.programs = programs;
+	public void setSavePrograms(Program[] programs) {
+		this.savePrograms = programs;
 	}
 	public String[] getDeletePrograms() {
 		return deletePrograms;
