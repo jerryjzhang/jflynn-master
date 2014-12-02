@@ -13,8 +13,10 @@ import com.tencent.jflynn.domain.Formation;
 import com.tencent.jflynn.exception.ObjectNotFoundException;
 import com.tencent.jflynn.service.AppService;
 import com.tencent.jflynn.service.FormationService;
+import com.wordnik.swagger.annotations.Api;
 
 @RestController
+@Api("formations")
 @RequestMapping("/formations")
 public class FormationControllers {
 	@Autowired
@@ -23,7 +25,7 @@ public class FormationControllers {
 	@Autowired
 	private AppService appService;
 	
-	@RequestMapping("/getAll")
+	@RequestMapping(value="/getAll", method=RequestMethod.GET, produces="application/json")
     public List<Formation> getAll() {
     	return formationService.getAllFormations();
     }

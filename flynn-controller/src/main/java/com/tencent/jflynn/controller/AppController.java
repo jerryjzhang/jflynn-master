@@ -19,8 +19,10 @@ import com.tencent.jflynn.exception.ObjectNotFoundException;
 import com.tencent.jflynn.service.AppService;
 import com.tencent.jflynn.service.ReleaseService;
 import com.tencent.jflynn.utils.IdGenerator;
+import com.wordnik.swagger.annotations.Api;
 
 @RestController
+@Api("apps")
 @RequestMapping("/apps")
 public class AppController {
 	@Autowired
@@ -29,7 +31,7 @@ public class AppController {
 	@Autowired
 	private ReleaseService releaseService;
 	
-	@RequestMapping("/get/{appName}")
+	@RequestMapping(value="/get/{appName}", method=RequestMethod.POST, produces="application/json")
     public App get(@PathVariable("appName") String appName) {
     	App app = appService.getAppByName(appName);
     	if(app == null){

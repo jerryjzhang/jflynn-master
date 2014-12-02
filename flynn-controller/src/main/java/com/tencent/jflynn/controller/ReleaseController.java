@@ -14,8 +14,10 @@ import com.tencent.jflynn.dto.ReleaseRequest;
 import com.tencent.jflynn.exception.ObjectNotFoundException;
 import com.tencent.jflynn.service.AppService;
 import com.tencent.jflynn.service.ReleaseService;
+import com.wordnik.swagger.annotations.Api;
 
 @RestController
+@Api("releases")
 @RequestMapping("/releases")
 public class ReleaseController {
 	@Autowired
