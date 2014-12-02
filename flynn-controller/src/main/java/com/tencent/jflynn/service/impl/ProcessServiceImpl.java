@@ -9,16 +9,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import com.tencent.jflynn.dao.ArtifactDao;
-import com.tencent.jflynn.dao.FormationDao;
 import com.tencent.jflynn.domain.Program;
+import com.tencent.jflynn.dto.ProcessRequest;
 import com.tencent.jflynn.dto.scheduler.ExtendedProgram;
 import com.tencent.jflynn.dto.scheduler.ScheduleRequest;
-import com.tencent.jflynn.service.SchedulerService;
+import com.tencent.jflynn.service.ProcessService;
 import com.tencent.jflynn.utils.ShellCommandExecutor;
 
 @Service
-public class SchedulerServiceImpl implements SchedulerService {
-	private static final Logger LOG = Logger.getLogger(SchedulerServiceImpl.class);
+public class ProcessServiceImpl implements ProcessService {
+	private static final Logger LOG = Logger.getLogger(ProcessServiceImpl.class);
 			
 	@Value("${schedulerUrl}")
 	private String schedulerUrl;
@@ -27,12 +27,10 @@ public class SchedulerServiceImpl implements SchedulerService {
 	
 	@Autowired
 	private ArtifactDao artifactDao;
-	@Autowired
-	private FormationDao formationDao;
 	
 	private RestTemplate restTemplate = new RestTemplate();
 	
-	public void schedule(ScheduleRequest req){
+	public void schedule(String appName, ScheduleRequest req){
 		if("standalone".equals(workMode)){
 			scheduleLocal(req);
 			return;
@@ -41,13 +39,29 @@ public class SchedulerServiceImpl implements SchedulerService {
 		LOG.info("Response from scheduler for ACTION schedule: " + success);
 	}
 	
-	public void stopApp(String appName){
+	public void stop(String appName, ProcessRequest req){
+		if(req == null || req.isEmpty()){
+			stopByApp(appName);
+		}else if(req.getProcessId() != null){
+			stop(req.getProcessId());
+		}else if(req.getProgramName() != null){
+			stopByProgram(appName, req.getProgramName());
+		}
+	}
+	
+	public Process[] list(String appName, ProcessRequest req){
+		Process[] processes = restTemplate.getForEntity(schedulerUrl+"/apps/containers/"+appName, Process[].class).getBody();
+		LOG.info("Response from scheduler for ACTION list: " + processes);
+		return processes;
+	}
+	
+	public void stopByApp(String appName){
 		boolean success = restTemplate.postForEntity(schedulerUrl+"/apps/kill/"+appName, null, Boolean.class).getBody();
 		LOG.info("Response from scheduler for ACTION stopApp: " + success);
 	}
 	
-	public void stopProgram(String programName){
-		boolean success = restTemplate.postForEntity(schedulerUrl+"/programs/kill/"+programName, null, Boolean.class).getBody();
+	public void stopByProgram(String appName, String programName){
+		boolean success = restTemplate.postForEntity(schedulerUrl+"/programs/kill/"+appName+"/"+programName, null, Boolean.class).getBody();
 		LOG.info("Response from scheduler for ACTION stopProgram: " + success);
 	}
 	
@@ -84,7 +98,7 @@ public class SchedulerServiceImpl implements SchedulerService {
 		}
 	}
 
-	public void stopAppContainer(String programName, String containerId) {
+	public void stop(String processId) {
 		// TODO Auto-generated method stub
 		
 	}

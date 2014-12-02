@@ -13,7 +13,6 @@ import com.tencent.jflynn.domain.App;
 import com.tencent.jflynn.domain.Release;
 import com.tencent.jflynn.dto.ReleaseRequest;
 import com.tencent.jflynn.dto.ScaleRequest;
-import com.tencent.jflynn.dto.StopAppRequest;
 import com.tencent.jflynn.exception.ObjectAlreadyExistException;
 import com.tencent.jflynn.exception.ObjectNotFoundException;
 import com.tencent.jflynn.service.AppService;
@@ -31,7 +30,7 @@ public class AppController {
 	@Autowired
 	private ReleaseService releaseService;
 	
-	@RequestMapping(value="/get/{appName}", method=RequestMethod.POST, produces="application/json")
+	@RequestMapping(value="/get/{appName}", method=RequestMethod.GET, produces="application/json")
     public App get(@PathVariable("appName") String appName) {
     	App app = appService.getAppByName(appName);
     	if(app == null){
@@ -40,7 +39,7 @@ public class AppController {
     	return app;
     }
 	
-	@RequestMapping(value="/create/{appName}", method=RequestMethod.POST, produces="application/json")
+	@RequestMapping(value="/create/{appName}", method=RequestMethod.POST, consumes="application/json")
 	public String create(@PathVariable("appName") String appName){
 		App app = appService.getAppByName(appName);
 		if(app != null){
@@ -58,7 +57,7 @@ public class AppController {
 		return app.getId();
 	}
 	
-	@RequestMapping(value="/delete/{appName}", method=RequestMethod.DELETE, produces="application/json")
+	@RequestMapping(value="/delete/{appName}", method=RequestMethod.DELETE)
 	public void delete(@PathVariable("appName") String appName){
 		App app = appService.getAppByName(appName);
     	if(app == null){
@@ -92,18 +91,6 @@ public class AppController {
 		}
 		
 		appService.scaleApp(app, release, req);
-	}
-	
-	/* Stop an application. */
-	@RequestMapping(value="/stop/{appName}", method=RequestMethod.PUT, consumes="application/json")
-	public void stopApp(@PathVariable("appName") String appName,
-			            @RequestBody StopAppRequest request) {
-		App app = appService.getAppByName(appName);
-		if (app == null) {
-			throw new ObjectNotFoundException();
-		}
-		
-		appService.stopApp(app, request);				
 	}
 	
 //	@ResponseStatus(value=HttpStatus.INTERNAL_SERVER_ERROR, reason="internal server error")  // 409

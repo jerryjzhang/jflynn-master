@@ -22,7 +22,7 @@ import com.tencent.jflynn.domain.Program;
 import com.tencent.jflynn.domain.Release;
 import com.tencent.jflynn.dto.ReleaseRequest;
 import com.tencent.jflynn.service.ReleaseService;
-import com.tencent.jflynn.service.SchedulerService;
+import com.tencent.jflynn.service.ProcessService;
 import com.tencent.jflynn.utils.IdGenerator;
 import com.tencent.jflynn.utils.ShellCommandExecutor;
 
@@ -37,7 +37,7 @@ public class ReleaseServiceImpl implements ReleaseService {
 	@Autowired
 	private FormationDao formationDao;
 	@Autowired
-	private SchedulerService scheduler;
+	private ProcessService scheduler;
 	
 	@Value("${httpServerUrl}")
 	private String httpServerUrl;

@@ -17,12 +17,11 @@ import com.tencent.jflynn.domain.Formation;
 import com.tencent.jflynn.domain.Release;
 import com.tencent.jflynn.dto.ReleaseRequest;
 import com.tencent.jflynn.dto.ScaleRequest;
-import com.tencent.jflynn.dto.StopAppRequest;
 import com.tencent.jflynn.dto.scheduler.ExtendedProgram;
 import com.tencent.jflynn.dto.scheduler.ScheduleRequest;
 import com.tencent.jflynn.service.AppService;
 import com.tencent.jflynn.service.ReleaseService;
-import com.tencent.jflynn.service.SchedulerService;
+import com.tencent.jflynn.service.ProcessService;
 
 @Service
 public class AppServiceImpl implements AppService {
@@ -37,7 +36,7 @@ public class AppServiceImpl implements AppService {
 	@Autowired
 	private FormationDao formationDao;
 	@Autowired
-	private SchedulerService scheduler;
+	private ProcessService scheduler;
 	@Autowired
 	private ReleaseService releaseService;
 	
@@ -91,21 +90,11 @@ public class AppServiceImpl implements AppService {
 			sreq.getPrograms().put(programName, ep);
 		}
 		
-		scheduler.schedule(sreq);
+		scheduler.schedule(app.getName(), sreq);
 		LOG.info("Scheduled programs for appName=" + app.getName());
 	}
 
 	public Formation getFormationByAppId(String appId) {
 		return formationDao.queryByAppId(appId);
-	}
-
-	public void stopApp(App app, StopAppRequest req) {
-		if (req == null) {
-			scheduler.stopApp(app.getName());
-		} else if (req.isStopProgram()) {
-			scheduler.stopProgram(req.getProgramName());
-		} else if (req.isStopContainer()) {
-			scheduler.stopAppContainer(req.getProgramName(), req.getContainerId());
-		}
 	}
 }
