@@ -4,6 +4,14 @@ public class ProcessRequest {
     private String programName;
     private String processId;
     
+    public ProcessRequest(){
+    }
+
+    public ProcessRequest(String programName, String processId){
+    	this.programName = programName;
+    	this.processId = processId;
+    }
+    
     public void setProgramName(String programName) {
     	this.programName = programName;
     }
