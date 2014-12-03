@@ -4,13 +4,11 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.tencent.jflynn.dao.AppDao;
 import com.tencent.jflynn.dao.ArtifactDao;
 import com.tencent.jflynn.dao.FormationDao;
-import com.tencent.jflynn.dao.ReleaseDao;
 import com.tencent.jflynn.domain.App;
 import com.tencent.jflynn.domain.Artifact;
 import com.tencent.jflynn.domain.Formation;
@@ -30,26 +28,13 @@ public class AppServiceImpl implements AppService {
 	@Autowired
 	private AppDao appDao;
 	@Autowired
-	private ReleaseDao releaseDao;
-	@Autowired
 	private ArtifactDao artifactDao;
 	@Autowired
 	private FormationDao formationDao;
 	@Autowired
-	private ProcessService scheduler;
+	private ProcessService processService;
 	@Autowired
 	private ReleaseService releaseService;
-	
-	@Value("${httpServerUrl}")
-	private String httpServerUrl;
-	@Value("${svnImage:tegdsf/svn}")
-	private String svnImage;
-	@Value("${slugBuilderImage:tegdsf/slugbuilder}")
-	private String slugBuilderImage;
-	@Value("${slugRunnerImage:tegdsf/slugrunner}")
-	private String slugRunnerImage;
-	@Value("${slugBuildScript:slugBuild.sh}")
-	private String slugBuildScript;
 	
 	public void createApp(App app){
 		appDao.insert(app);
@@ -90,7 +75,7 @@ public class AppServiceImpl implements AppService {
 			sreq.getPrograms().put(programName, ep);
 		}
 		
-		scheduler.schedule(app.getName(), sreq);
+		processService.schedule(app.getName(), sreq);
 		LOG.info("Scheduled programs for appName=" + app.getName());
 	}
 

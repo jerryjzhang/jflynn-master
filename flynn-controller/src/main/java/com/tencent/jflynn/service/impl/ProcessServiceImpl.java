@@ -24,8 +24,6 @@ public class ProcessServiceImpl implements ProcessService {
 			
 	@Value("${schedulerUrl}")
 	private String schedulerUrl;
-	@Value("${workMode:standalone}")
-	private String workMode;
 	
 	@Autowired
 	private ArtifactDao artifactDao;
@@ -33,38 +31,25 @@ public class ProcessServiceImpl implements ProcessService {
 	protected RestOperations restClient = new RestTemplate();
 	
 	public void schedule(String appName, ScheduleRequest req){
-//		if("standalone".equals(workMode)){
-//			scheduleLocal(req);
-//			return;
-//		}
 		boolean success = restClient.postForEntity(schedulerUrl+"/apps/scale", req, Boolean.class).getBody();
 		LOG.info("Response from scheduler for ACTION schedule: " + success);
 	}
 	
 	public void stop(String appName, ProcessRequest req){
-		if(req == null || req.isEmpty()){
-			stopByApp(appName);
-		}else if(req.getProcessId() != null){
-			stop(req.getProcessId());
-		}else if(req.getProgramName() != null){
-			stopByProgram(appName, req.getProgramName());
+		String url = schedulerUrl+"/apps/kill/"+appName;
+		if(req != null && req.getProcessId() != null){
+			url += "?processId="+req.getProcessId();
+		}else if(req != null && req.getProgramName() != null){
+			url += "?programName="+req.getProgramName();
 		}
+		boolean success = restClient.postForEntity(url, null, Boolean.class).getBody();
+		LOG.info("Response from scheduler for ACTION stopApp: " + success);
 	}
 	
 	public Process[] list(String appName, ProcessRequest req){
 		Process[] processes = restClient.getForEntity(schedulerUrl+"/apps/process/"+appName, Process[].class).getBody();
 		LOG.info("Response from scheduler for ACTION list: " + processes);
 		return processes;
-	}
-	
-	public void stopByApp(String appName){
-		boolean success = restClient.postForEntity(schedulerUrl+"/apps/kill/"+appName, null, Boolean.class).getBody();
-		LOG.info("Response from scheduler for ACTION stopApp: " + success);
-	}
-	
-	public void stopByProgram(String appName, String programName){
-		boolean success = restClient.postForEntity(schedulerUrl+"/programs/kill/"+appName+"/"+programName, null, Boolean.class).getBody();
-		LOG.info("Response from scheduler for ACTION stopProgram: " + success);
 	}
 	
 	public void scheduleLocal(ScheduleRequest req){
@@ -98,10 +83,5 @@ public class ProcessServiceImpl implements ProcessService {
 				ShellCommandExecutor.execute(cmd.toString());
 			}
 		}
-	}
-
-	public void stop(String processId) {
-		// TODO Auto-generated method stub
-		
 	}
 }

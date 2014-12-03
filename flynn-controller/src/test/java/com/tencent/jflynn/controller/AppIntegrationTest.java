@@ -24,15 +24,11 @@ import com.tencent.jflynn.dto.ReleaseRequest;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = JFlynnMain.class)
 @WebAppConfiguration
-@IntegrationTest("CONFIG_MODE:DEV")
+@IntegrationTest("spring.profiles.active:test")
 public class AppIntegrationTest {
 	private RestTemplate restTemplate = new TestRestTemplate();
 	private final String appName = "myapp";
 	private final String baseURL = "http://localhost:58080";
-	
-	public AppIntegrationTest(){
-		System.setProperty("CONFIG_MODE", "DEV");
-	}
 	
 	@Before
 	public void setUp(){

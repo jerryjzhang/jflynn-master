@@ -20,11 +20,13 @@ import com.tencent.jflynn.domain.App;
 import com.tencent.jflynn.domain.Artifact;
 import com.tencent.jflynn.domain.Program;
 import com.tencent.jflynn.domain.Release;
+import com.tencent.jflynn.dto.BuildRequest;
+import com.tencent.jflynn.dto.BuildResponse;
 import com.tencent.jflynn.dto.ReleaseRequest;
+import com.tencent.jflynn.service.BuildService;
 import com.tencent.jflynn.service.ReleaseService;
 import com.tencent.jflynn.service.ProcessService;
 import com.tencent.jflynn.utils.IdGenerator;
-import com.tencent.jflynn.utils.ShellCommandExecutor;
 
 @Service
 public class ReleaseServiceImpl implements ReleaseService {
@@ -38,17 +40,11 @@ public class ReleaseServiceImpl implements ReleaseService {
 	private FormationDao formationDao;
 	@Autowired
 	private ProcessService scheduler;
+	@Autowired
+	private BuildService imageBuilder;
 	
 	@Value("${httpServerUrl}")
 	private String httpServerUrl;
-	@Value("${svnImage:tegdsf/svn}")
-	private String svnImage;
-	@Value("${slugBuilderImage:tegdsf/slugbuilder}")
-	private String slugBuilderImage;
-	@Value("${slugRunnerImage:tegdsf/slugrunner}")
-	private String slugRunnerImage;
-	@Value("${slugBuildScript:slugBuild.sh}")
-	private String slugBuildScript;
 	
 	private static final Pattern PATTERN_TYPES = Pattern.compile(".*declares types -> (.*)");
 	private static final Cloner cloner = new Cloner();
@@ -144,15 +140,11 @@ public class ReleaseServiceImpl implements ReleaseService {
 		Map<String,String> env = new HashMap<String,String>();
 		env.put("SVN_URL", req.getSvnURL());
 		env.put("APP_NAME", fileName);
-		env.put("IMAGE_SVN", svnImage);
-		env.put("HTTP_SERVER_URL", httpServerUrl);
-		env.put("IMAGE_SLUGBUILDER", slugBuilderImage);
 		
-		String cmd = slugBuildScript;
-		String out = ShellCommandExecutor.execute(cmd, env);
-		System.out.println(out);
+		BuildResponse resp = imageBuilder.buildImage(new BuildRequest(app.getName(), env));
+		
 		//Grep output and extract process types
-		Matcher m = PATTERN_TYPES.matcher(out);
+		Matcher m = PATTERN_TYPES.matcher(resp.getBuildOutput());
 		String [] processTypes = null;
 		if(m.find()){
 			processTypes = m.group(1).split(", ");
@@ -161,7 +153,7 @@ public class ReleaseServiceImpl implements ReleaseService {
 		//create artifact and release object
 		Artifact artifact = new Artifact();
 		artifact.setId(IdGenerator.generate());
-		artifact.setUri(slugRunnerImage);
+		artifact.setUri(resp.getImageUri());
 		artifact.setCreateTime(new Timestamp(System.currentTimeMillis()));
 		artifactDao.insert(artifact);
 		LOG.info("Created artifact for appName=" + app.getName() + " artifact=" + artifact);
