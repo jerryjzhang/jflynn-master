@@ -10,6 +10,7 @@ import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
 import com.tencent.jflynn.dao.ArtifactDao;
+import com.tencent.jflynn.domain.Process;
 import com.tencent.jflynn.domain.Program;
 import com.tencent.jflynn.dto.ProcessRequest;
 import com.tencent.jflynn.dto.scheduler.ExtendedProgram;

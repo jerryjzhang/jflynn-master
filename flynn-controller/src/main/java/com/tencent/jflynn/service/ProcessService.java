@@ -1,6 +1,7 @@
 package com.tencent.jflynn.service;
 
 import com.tencent.jflynn.dto.ProcessRequest;
+import com.tencent.jflynn.domain.Process;
 import com.tencent.jflynn.dto.scheduler.ScheduleRequest;
 
 public interface ProcessService {

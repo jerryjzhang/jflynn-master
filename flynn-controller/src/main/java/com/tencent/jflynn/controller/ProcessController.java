@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tencent.jflynn.domain.App;
+import com.tencent.jflynn.domain.Process;
 import com.tencent.jflynn.dto.ProcessRequest;
 import com.tencent.jflynn.exception.ObjectNotFoundException;
 import com.tencent.jflynn.service.AppService;

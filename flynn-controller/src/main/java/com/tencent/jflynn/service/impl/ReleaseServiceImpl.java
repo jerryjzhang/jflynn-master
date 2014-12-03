@@ -68,7 +68,7 @@ public class ReleaseServiceImpl implements ReleaseService {
 	public Release createRelease(App app, ReleaseRequest req){
 		Release baseRelease = null;
 		//based on the specified version or the current release of the app
-		if(req.getBaseVersion() != null){
+		if(req.getBaseVersion() != null && req.getBaseVersion() > 0){
 			baseRelease = releaseDao.queryByAppIdAndVersion(app.getId(), req.getBaseVersion());
 			req.setComment("Rollback to version " + req.getBaseVersion());
 		}else if(app.getReleaseID() != null){
