@@ -15,7 +15,7 @@ import com.tencent.jflynn.utils.ShellCommandExecutor;
 public class BuildServiceImpl implements BuildService {
 	private static final Logger LOG = Logger.getLogger(BuildServiceImpl.class);
 
-	@Value("${httpServerUrl}")
+	@Value("${blobstore.url}")
 	private String httpServerUrl;
 	@Value("${svnImage:tegdsf/svn}")
 	private String svnImage;

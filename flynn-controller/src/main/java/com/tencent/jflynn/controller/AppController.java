@@ -1,6 +1,7 @@
 package com.tencent.jflynn.controller;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,6 +30,13 @@ public class AppController {
 	
 	@Autowired
 	private ReleaseService releaseService;
+	
+	@RequestMapping(value="/list", method=RequestMethod.GET, produces="application/json")
+	public App[] list(){
+		List<App> apps = appService.getAll();
+		
+		return apps.toArray(new App[apps.size()]);
+	}
 	
 	@RequestMapping(value="/get/{appName}", method=RequestMethod.GET, produces="application/json")
     public App get(@PathVariable("appName") String appName) {

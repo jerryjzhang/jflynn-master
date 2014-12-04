@@ -1,6 +1,8 @@
 package com.tencent.jflynn.dao.mem;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Repository;
@@ -16,6 +18,10 @@ public class AppDaoMem implements AppDao {
 	public void insert(App app){
 		nameToApp.put(app.getName(), app);
 		idToApp.put(app.getId(), app);
+	}
+	
+	public List<App> queryAll(){
+		return new ArrayList<App>(idToApp.values());
 	}
 	
 	public App queryByName(String appName){

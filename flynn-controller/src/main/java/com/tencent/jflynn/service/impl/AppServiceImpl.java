@@ -1,5 +1,6 @@
 package com.tencent.jflynn.service.impl;
 
+import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -42,6 +43,10 @@ public class AppServiceImpl implements AppService {
 	
 	public void deleteApp(App app){
 		appDao.delete(app);
+	}
+	
+	public List<App> getAll(){
+		return appDao.queryAll();
 	}
 	
 	public App getAppByName(String appName){

@@ -43,7 +43,7 @@ public class ReleaseServiceImpl implements ReleaseService {
 	@Autowired
 	private BuildService imageBuilder;
 	
-	@Value("${httpServerUrl}")
+	@Value("${blobstore.url}")
 	private String httpServerUrl;
 	
 	private static final Pattern PATTERN_TYPES = Pattern.compile(".*declares types -> (.*)");

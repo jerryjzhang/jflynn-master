@@ -37,10 +37,12 @@ public class ProcessServiceStandalone implements ProcessService {
 				runningProcesses = new ArrayList<Process>();
 				processMap.put(appName, runningProcesses);
 			}
-			if(runningProcesses.size() < ep.getReplica()){
+			int actualSize = runningProcesses.size();
+			int expectedSize = ep.getReplica();
+			if(actualSize < expectedSize){
 				LOG.info("creating new containers");
 				//create new container
-				for(int i=1;i<=ep.getReplica()-runningProcesses.size();i++){
+				for(int i=1;i<=expectedSize-actualSize;i++){
 					// Create container
 					final ContainerConfig config = ContainerConfig.builder()
 					    .image(req.getImageUri())
@@ -60,10 +62,10 @@ public class ProcessServiceStandalone implements ProcessService {
 						e.printStackTrace();
 					}
 				}
-			}else if(runningProcesses.size() > ep.getReplica()){
+			}else if(actualSize > expectedSize){
 				LOG.info("killing existing containers");
 				//kill running containers
-				for(int i=1;i<=runningProcesses.size()-ep.getReplica();i++){
+				for(int i=1;i<=actualSize-expectedSize;i++){
 					Process process = runningProcesses.remove(0);
 					try{
 						docker.killContainer(process.getProcessId());

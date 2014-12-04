@@ -24,7 +24,7 @@ import com.tencent.jflynn.utils.ShellCommandExecutor;
 public class ProcessServiceImpl implements ProcessService {
 	private static final Logger LOG = Logger.getLogger(ProcessServiceImpl.class);
 			
-	@Value("${schedulerUrl}")
+	@Value("${scheduler.url}")
 	private String schedulerUrl;
 	
 	@Autowired

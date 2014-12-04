@@ -1,5 +1,7 @@
 package com.tencent.jflynn.service;
 
+import java.util.List;
+
 import com.tencent.jflynn.domain.App;
 import com.tencent.jflynn.domain.Release;
 import com.tencent.jflynn.dto.ReleaseRequest;
@@ -11,4 +13,5 @@ public interface AppService {
 	public Release deployApp(App app, ReleaseRequest req);
 	public void scaleApp(App app, Release release, ScaleRequest req);
 	public App getAppByName(String appName);
+	public List<App> getAll();
 }
