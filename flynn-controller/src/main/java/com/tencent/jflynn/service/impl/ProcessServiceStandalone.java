@@ -80,6 +80,26 @@ public class ProcessServiceStandalone implements ProcessService {
 	}
 	
 	public void stop(String appName, ProcessRequest req){
+		if(req != null && req.getProcessId() != null){
+			try{
+				docker.killContainer(req.getProcessId());
+			}catch(DockerException e){
+				e.printStackTrace();
+			}catch(InterruptedException e){
+				e.printStackTrace();
+			}
+		}else{
+			List<Process> runningProcesses = getProcesses(appName, req.getProgramName());
+			for(Process p : runningProcesses){
+				try{
+					docker.killContainer(p.getProcessId());
+				}catch(DockerException e){
+					e.printStackTrace();
+				}catch(InterruptedException e){
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 	
 	public Process[] list(String appName, ProcessRequest req){

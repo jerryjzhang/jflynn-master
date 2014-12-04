@@ -36,7 +36,7 @@ public class ProcessController {
     	return processService.list(appName, new ProcessRequest(programName, processId));
 	}
 	
-	@RequestMapping(value="/stop/{appName}", method=RequestMethod.PUT, consumes="application/json")
+	@RequestMapping(value="/stop/{appName}", method=RequestMethod.PUT)
 	public void stop(@PathVariable("appName") String appName,
 			@RequestParam(value="programName", required=false) String programName,
 			@RequestParam(value="processId", required=false) String processId){
