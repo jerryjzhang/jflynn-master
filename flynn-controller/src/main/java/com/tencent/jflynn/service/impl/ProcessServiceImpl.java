@@ -5,6 +5,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
@@ -19,6 +20,7 @@ import com.tencent.jflynn.service.ProcessService;
 import com.tencent.jflynn.utils.ShellCommandExecutor;
 
 @Service
+@Profile("production")
 public class ProcessServiceImpl implements ProcessService {
 	private static final Logger LOG = Logger.getLogger(ProcessServiceImpl.class);
 			

@@ -11,7 +11,7 @@ import com.tencent.jflynn.service.BuildService;
 import com.tencent.jflynn.utils.ShellCommandExecutor;
 
 @Service
-@Profile("prod")
+@Profile("production")
 public class BuildServiceImpl implements BuildService {
 	private static final Logger LOG = Logger.getLogger(BuildServiceImpl.class);
 

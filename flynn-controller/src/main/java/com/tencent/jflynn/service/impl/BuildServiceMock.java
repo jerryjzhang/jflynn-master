@@ -9,7 +9,7 @@ import com.tencent.jflynn.dto.BuildResponse;
 import com.tencent.jflynn.service.BuildService;
 
 @Service
-@Profile("test")
+@Profile({"test","standalone"})
 public class BuildServiceMock implements BuildService {
 	@Value("${slugRunnerImage:tegdsf/slugrunner}")
 	private String slugRunnerImage;
