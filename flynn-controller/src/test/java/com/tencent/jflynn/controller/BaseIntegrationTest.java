@@ -20,7 +20,7 @@ import com.tencent.jflynn.boot.JFlynnMain;
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
 @SpringApplicationConfiguration(classes = JFlynnMain.class)
-@IntegrationTest("spring.profiles.active:test")
+@IntegrationTest("work.mode:test")
 public abstract class BaseIntegrationTest {
 	protected RestTemplate restTemplate = new TestRestTemplate();
 	protected final String appName = "myapp";

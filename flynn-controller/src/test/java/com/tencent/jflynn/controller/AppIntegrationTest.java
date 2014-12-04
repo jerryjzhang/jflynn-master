@@ -24,7 +24,7 @@ import com.tencent.jflynn.dto.ReleaseRequest;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = JFlynnMain.class)
 @WebAppConfiguration
-@IntegrationTest("spring.profiles.active:test")
+@IntegrationTest("work.mode:test")
 public class AppIntegrationTest {
 	private RestTemplate restTemplate = new TestRestTemplate();
 	private final String appName = "myapp";
